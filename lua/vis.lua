@@ -263,9 +263,33 @@ vis.types.window.set_syntax = function(win, syntax)
 	local lexer = lexers.load(syntax)
 	if not lexer then return false end
 
+	
+	
 	for token_name, id in pairs(lexer._TOKENSTYLES) do
-		local style = lexers['STYLE_'..string.upper(token_name)] or lexer._EXTRASTYLES[token_name]
-		win:style_define(id, style)
+--[[
+		TODO:  REDO Everything
+			this entire thing is a dirty fix since it relies on syncing with scintilua
+			lexers[STYLE] contains other things which are unrelated
+
+		token_name is "function", "preprocessor", "variable" and so on
+		id is a number
+
+		win:style_define(number,"fore:red")
+		this is defined in the theme
+
+		this used to return a string, now it returns a table
+		this is because lexers now writes to the table
+		STYLE should have its own table.
+
+		NOTE: removed extra styles
+		add with or lexer._EXTRASTYLES[token_name]
+--]]
+		
+		local style = lexers['STYLE_'..string.upper(token_name)]
+		if type(style)=="string" then
+			win:style_define(id,	style)
+		end
+
 	end
 
 	win.syntax = syntax
