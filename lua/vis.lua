@@ -115,6 +115,11 @@ end
 
 vis.lexers = {}
 
+do
+	local f = io.open("/tmp/visprint","w")
+	print = function(...) f:write(...) f:write("\n") f:flush() end
+end
+
 if not vis:module_exist('lpeg') then
 	vis:info('WARNING: could not find lpeg module')
 elseif not vis:module_exist('lexer') then
@@ -326,5 +331,8 @@ vis.types.file.match_at = function(file, pattern, pos, horizon)
 		s = e
 	end
 end
+
+
+print"hello world"
 
 require('vis-std')
