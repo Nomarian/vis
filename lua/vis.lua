@@ -263,16 +263,13 @@ vis.types.window.set_syntax = function(win, syntax)
 	local lexer = lexers.load(syntax)
 	if not lexer then return false end
 
-	
-	
 	for token_name, id in pairs(lexer._TOKENSTYLES) do
 		local style = lexers['STYLE_'..string.upper(token_name)]
-			-- REMOVED
+			-- REMOVED extra lexers.
 			-- or lexers['STYLE_'..string.upper(token_name)]
 		if type(style)=="string" then
 			win:style_define(id,	style)
 		end
-
 	end
 
 	win.syntax = syntax
@@ -309,6 +306,5 @@ vis.types.file.match_at = function(file, pattern, pos, horizon)
 		s = e
 	end
 end
-
 
 require('vis-std')
