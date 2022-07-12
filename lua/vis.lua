@@ -115,11 +115,6 @@ end
 
 vis.lexers = {}
 
-do
-	local f = io.open("/tmp/visprint","w")
-	print = function(...) f:write(...) f:write("\n") f:flush() end
-end
-
 if not vis:module_exist('lpeg') then
 	vis:info('WARNING: could not find lpeg module')
 elseif not vis:module_exist('lexer') then
@@ -271,26 +266,9 @@ vis.types.window.set_syntax = function(win, syntax)
 	
 	
 	for token_name, id in pairs(lexer._TOKENSTYLES) do
---[[
-		TODO:  REDO Everything
-			this entire thing is a dirty fix since it relies on syncing with scintilua
-			lexers[STYLE] contains other things which are unrelated
-
-		token_name is "function", "preprocessor", "variable" and so on
-		id is a number
-
-		win:style_define(number,"fore:red")
-		this is defined in the theme
-
-		this used to return a string, now it returns a table
-		this is because lexers now writes to the table
-		STYLE should have its own table.
-
-		NOTE: removed extra styles
-		add with or lexer._EXTRASTYLES[token_name]
---]]
-		
 		local style = lexers['STYLE_'..string.upper(token_name)]
+			-- REMOVED
+			-- or lexers['STYLE_'..string.upper(token_name)]
 		if type(style)=="string" then
 			win:style_define(id,	style)
 		end
@@ -332,7 +310,5 @@ vis.types.file.match_at = function(file, pattern, pos, horizon)
 	end
 end
 
-
-print"hello world"
 
 require('vis-std')
