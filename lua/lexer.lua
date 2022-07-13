@@ -1431,8 +1431,9 @@ local lexers = {} -- cache of loaded lexers
 -- @return lexer object
 -- @name load
 
+-- finds the vis installed lexer
+-- TODO: include ~/.config/vis or ~/.vis
 local LEXERPATH1 = package.searchpath("lexers/null", package.path):gsub("/null%.lua$","")
-local LEXERPATH2 = LEXERPATH1 .. "/?.lua"
 
 function M.load(name, alt_name, cache)
   if cache and lexers[alt_name or name] then return lexers[alt_name or name] end
@@ -1462,7 +1463,8 @@ function M.load(name, alt_name, cache)
   -- whitespace style names. Note that loading embedded lexers changes `WHITESPACE` again,
   -- so when adding it later, do not reference the potentially incorrect value.
   M.WHITESPACE = (alt_name or name) .. '_whitespace'
-  local lexer = dofile(assert( package.searchpath(name, LEXERPATH2) ))
+  local lexer = require("lexers/" .. name)
+  -- local lexer = dofile(assert( package.searchpath(name, LEXERPATH2) ))
   assert(lexer, string.format("'%s.lua' did not return a lexer", name))
   if alt_name then lexer._NAME = alt_name end
   if not getmetatable(lexer) or lexer._LEGACY then
