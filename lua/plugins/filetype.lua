@@ -518,6 +518,16 @@ vis.ftdetect.filetypes = {
 	},
 }
 
+-- string.find(table, pattern)
+local function TStringFind(tbl, subject)
+	for _, pattern in ipairs(tbl or {}) do
+		if subject:find(pattern) then
+			return true
+		end
+	end
+	return false
+end
+
 vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 
 	local set_filetype = function(syntax, filetype)
@@ -614,21 +624,12 @@ vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 			utility = string.match(field[1] or "", "[^/]+$") -- remove filepath
 		end
 
-		local function searcher(tbl, subject)
-			for _, pattern in ipairs(tbl or {}) do
-				if string.match(subject, pattern) then
-					return true
-				end
-			end
-			return false
-		end
-
 		if utility or fullhb then
 			for lang, ft in pairs(vis.ftdetect.filetypes) do
 				if
-					utility and searcher(ft.utility, utility)
+					utility and TStringFind(ft.utility, utility)
 					or
-					fullhb and searcher(ft.hashbang, fullhb)
+					fullhb and TStringFind(ft.hashbang, fullhb)
 				then
 					set_filetype(lang, ft)
 					return
