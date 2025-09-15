@@ -520,6 +520,20 @@ vis.ftdetect.filetypes = {
 	},
 }
 
+M.mimes = {}
+for lang_name, lang in pairs(M.filetypes) do
+	for i, mime in ipairs(lang.mime or {}) do
+		if M.mimes[mime] then
+			error("mime " .. mime .. " already exists?")
+		end
+		if not mime:find"/" then
+			mime = "text/" .. mime
+		end
+		M.mimes[mime] = lang_name
+	end
+end
+
+
 -- string.find(table, pattern)
 local function TStringFind(tbl, subject)
 	for _, pattern in ipairs(tbl or {}) do
@@ -611,14 +625,8 @@ vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 		)
 		mime = file:read('*l')
 		file:close()
-		if mime and mime~="" then
-			for lang, ft in pairs(vis.ftdetect.filetypes) do
-				for _, ft_mime in pairs(ft.mime or {}) do
-					if mime == ft_mime then
-						return set_filetype(lang)
-					end
-				end
-			end
+		if mime and M.mimes[mime] then
+			return set_filetype(M.mimes[mime])
 		end
 	end
 
