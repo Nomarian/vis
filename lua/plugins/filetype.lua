@@ -567,8 +567,11 @@ end
 
 
 vis.events.subscribe(vis.events.WIN_OPEN, function(win)
+	local path = win.file.name -- filepath
+	local mime
 
 	local set_filetype = function(syntax)
+		-- Cannot move because of win
 		local filetype = M.filetypes[syntax]
 		for _, cmd in pairs(filetype.cmd or {}) do
 			vis:command(cmd)
@@ -576,9 +579,6 @@ vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 		win:set_syntax(filetype.alt_name or syntax)
 		return nil
 	end
-
-	local path = win.file.name -- filepath
-	local mime
 
 	if path and #path > 0 then
 		local name = path:match("[^/]+$") -- filename
@@ -604,19 +604,18 @@ vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 		end
 
 		-- run file(1) to determine mime type
-		local file = io.popen(string.format("file -bL --mime-type -- '%s'", path:gsub("'", "'\\''")))
-		if file then
-			mime = file:read('*all')
-			file:close()
-			if mime then
-				mime = mime:gsub('%s*$', '')
-			end
-			if mime and #mime > 0 then
-				for lang, ft in pairs(vis.ftdetect.filetypes) do
-					for _, ft_mime in pairs(ft.mime or {}) do
-						if mime == ft_mime then
-							return set_filetype(lang)
-						end
+		local file = io.popen(
+			string.format(
+				"file -bL --mime-type -- '%s'", path:gsub("'", "'\\''")
+			)
+		)
+		mime = file:read('*l')
+		file:close()
+		if mime and mime~="" then
+			for lang, ft in pairs(vis.ftdetect.filetypes) do
+				for _, ft_mime in pairs(ft.mime or {}) do
+					if mime == ft_mime then
+						return set_filetype(lang)
 					end
 				end
 			end
