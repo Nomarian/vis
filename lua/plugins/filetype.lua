@@ -1,4 +1,6 @@
-vis.ftdetect = {}
+
+local M = {}
+vis.ftdetect = M
 
 vis.ftdetect.ignoresuffixes = {
 	"~+$", "%.orig$", "%.bak$", "%.old$", "%.new$"
@@ -566,11 +568,13 @@ end
 
 vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 
-	local set_filetype = function(syntax, filetype)
+	local set_filetype = function(syntax)
+		local filetype = M.filetypes[syntax]
 		for _, cmd in pairs(filetype.cmd or {}) do
 			vis:command(cmd)
 		end
 		win:set_syntax(filetype.alt_name or syntax)
+		return nil
 	end
 
 	local path = win.file.name -- filepath
@@ -593,8 +597,7 @@ vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 			for lang, ft in pairs(vis.ftdetect.filetypes) do
 				for _, pattern in pairs(ft.ext or {}) do
 					if name:match(pattern) then
-						set_filetype(lang, ft)
-						return
+						return set_filetype(lang)
 					end
 				end
 			end
@@ -612,8 +615,7 @@ vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 				for lang, ft in pairs(vis.ftdetect.filetypes) do
 					for _, ft_mime in pairs(ft.mime or {}) do
 						if mime == ft_mime then
-							set_filetype(lang, ft)
-							return
+							return set_filetype(lang)
 						end
 					end
 				end
@@ -627,8 +629,7 @@ vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 	if data and #data > 0 then
 		for lang, ft in pairs(vis.ftdetect.filetypes) do
 			if type(ft.detect) == 'function' and ft.detect(file, data) then
-				set_filetype(lang, ft)
-				return
+				return set_filetype(lang)
 			end
 		end
 
@@ -641,8 +642,7 @@ vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 					or
 					fullhb and TStringFind(ft.hashbang, fullhb)
 				then
-					set_filetype(lang, ft)
-					return
+					return set_filetype(lang)
 				end
 			end
 		end
@@ -650,8 +650,7 @@ vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 
 	-- try text lexer as a last resort
 	if (mime or 'text/plain'):match('^text/.+$') then
-		set_filetype('text', vis.ftdetect.filetypes.text)
-		return
+		return set_filetype('text')
 	end
 
 	win:set_syntax(nil)
