@@ -528,6 +528,42 @@ local function TStringFind(tbl, subject)
 	return false
 end
 
+--[[ hashbang check
+	hashbangs only have PATH <SPACE> ARG
+		if PATH matches /env, utility should be in args
+			POSIX does not have -S, but BSDs/Linux seem to
+			All do seem to have name=value
+			So far, this does the rudimentary job of parsing env args
+			for most cases, but its a bandaid
+			discard first arg if /-[^S]*S/; and all subsequent /=/
+			NOTE: this means you can't have a command with /^-|=/
+	return first field, which should be the utility.
+	NOTE: long-options (GNUisms) unsupported
+--]]
+local function GetHashBang(data)
+	local fullhb, utility = data:match"^#![ \t]*(/+[^/\n]+[^\n]*)"
+	if fullhb then
+		local i, field = 1, {}
+		for m in fullhb:gmatch"%g+" do field[i],i = m,i+1 end
+		-- NOTE: executables should not have a space (or =, see below)
+		if field[1]:match"/env$" then
+			table.remove(field,1)
+			-- it is assumed that the first argument are short options, with -S inside
+			if string.find(field[1] or "", "^%-[^S-]*S") then -- -S found
+				table.remove(field,1)
+				-- skip all name=value
+				while string.find(field[1] or "","=") do
+					table.remove(field,1)
+				end
+				-- (hopefully) whatever is left in field[1] should be the utility or nil
+			end
+		end
+		utility = string.find(field[1] or "", "[^/]+$") -- remove filepath
+	end
+	return fullhb, utility
+end
+
+
 vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 
 	local set_filetype = function(syntax, filetype)
@@ -596,33 +632,7 @@ vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 			end
 		end
 
---[[ hashbang check
-	hashbangs only have command <SPACE> argument
-		if /env, find utility in args
-			discard first arg if /-[^S]*S/; and all subsequent /=/
-			NOTE: this means you can't have a command with /^-|=/
-	return first field, which should be the utility.
-	NOTE: long-options unsupported
---]]
-		local fullhb, utility = data:match"^#![ \t]*(/+[^/\n]+[^\n]*)"
-		if fullhb then
-			local i, field = 1, {}
-			for m in fullhb:gmatch"%g+" do field[i],i = m,i+1 end
-			-- NOTE: executables should not have a space (or =, see below)
-			if field[1]:match"/env$" then
-				table.remove(field,1)
-				-- it is assumed that the first argument are short options, with -S inside
-				if string.match(field[1] or "", "^%-[^S-]*S") then -- -S found
-					table.remove(field,1)
-					-- skip all name=value
-					while string.match(field[1] or "","=") do
-						table.remove(field,1)
-					end
-					-- (hopefully) whatever is left in field[1] should be the utility or nil
-				end
-			end
-			utility = string.match(field[1] or "", "[^/]+$") -- remove filepath
-		end
+		local fullhb, utility = GetHashBang(data)
 
 		if utility or fullhb then
 			for lang, ft in pairs(vis.ftdetect.filetypes) do
