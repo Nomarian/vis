@@ -647,6 +647,8 @@ local utilities = {
 
 	tclsh = 'tcl',
 	jimsh = 'tcl',
+
+	lua = 'lua',
 }
 M.utils = utilities
 
