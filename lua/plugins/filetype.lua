@@ -2,6 +2,7 @@
 local M = {}
 vis.ftdetect = M
 
+-- Remove all suffixes to get the real extension/filename
 vis.ftdetect.ignoresuffixes = {
 	"~+$", "%.orig$", "%.bak$", "%.old$", "%.new$"
 }
@@ -27,13 +28,7 @@ vis.ftdetect.filetypes = {
 	asp = {},
 	autoit = {},
 	awk = {},
-	bash = {
-		name = {
-			"^APKBUILD$", "^%.login$", "^%.profile$",
-			"%.bashrc$", "^%.bash_profile$", '^%.bash.logout$', "^%.bash_login$",
-			"^%.mkshrc$"
-		},
-	},
+	bash = {},
 	batch = {},
 	bibtex = {},
 	boo = {},
@@ -58,13 +53,9 @@ vis.ftdetect.filetypes = {
 	dart = {},
 	desktop = {},
 	diff = {},
-	dockerfile = {
-		name = { "^Dockerfile$" }
-	},
+	dockerfile = {},
 	dot = {},
-	dsv = {
-		name = { "^group$", "^gshadow$", "^passwd$", "^shadow$" }
-	},
+	dsv = {},
 	eiffel = {},
 	elixir = {},
 	elm = {},
@@ -77,9 +68,7 @@ vis.ftdetect.filetypes = {
 	forth = {},
 	fortran = {},
 	fsharp = {},
-	fstab = {
-		name = { "^fstab$" }
-	},
+	fstab = {},
 	gap = {},
 	gemini = {},
 	gettext = {},
@@ -87,18 +76,13 @@ vis.ftdetect.filetypes = {
 	["git-commit"] = {
 		alt_name = "diff",
 		cmd = { "set colorcolumn 72" },
-		name = { "^COMMIT_EDITMSG$" }
 	},
-	["git-rebase"] = {
-		name = { "git%-rebase%-todo" }
-	},
+	["git-rebase"] = {},
 	gleam = {},
 	glsl = {},
 	gnuplot = {},
 	go = {},
-	groovy = {
-		name = { "^Jenkinsfile$" }
-	},
+	groovy = {},
 	gtkrc = {},
 	hare = {},
 	haskell = {},
@@ -125,15 +109,11 @@ vis.ftdetect.filetypes = {
 		utility = { "^lua%-?5?%d?$", "^lua%-?5%.%d$" }
 	},
 	mail = {},
-	makefile = {
-		name = { "^GNUmakefile$", "^[Mm]akefile$" },
-	},
+	makefile = {},
 	man = {},
 	markdown = {},
 	mediawiki = {},
-	meson = {
-		name = { "^meson%.build$", "^meson_options%.txt$", "^meson%.options$" }
-	},
+	meson = {},
 	modula2 = {},
 	modula3 = {},
 	moonscript = {},
@@ -150,9 +130,7 @@ vis.ftdetect.filetypes = {
 	php = {},
 	pico8 = {},
 	pike = {},
-	pkgbuild = {
-		name = { "^PKGBUILD$" }
-	},
+	pkgbuild = {},
 	pony = {},
 	powershell = {},
 	prolog = {},
@@ -176,9 +154,7 @@ vis.ftdetect.filetypes = {
 		datap = { "^#.* by RouterOS" }
 	},
 	rpmspec = {},
-	ruby = {
-		name = { "^Vagrantfile$" },
-	},
+	ruby = {},
 	rust = {},
 	sass = {},
 	scala = {},
@@ -207,13 +183,48 @@ vis.ftdetect.filetypes = {
 	vhdl = {},
 	wsf = {},
 	xml = {},
-	xs = {
-		name = { "^%.xsin$", "^%.xsrc$" }
-	},
+	xs = {},
 	xtend = {},
 	yaml = {},
 	zig = {}
 }
+
+-- complete filename, case sensitive
+local filenames = {
+	APKBUILD = 'bash',
+	[".login"] = 'bash',
+	profile = 'bash',
+	['.profile'] = 'bash',
+	mkshrc = 'bash',
+	['.mkshrc'] = 'bash',
+	['bash.bashrc'] = 'bash',
+	['bash.bash.logout'] = 'bash',
+	['.bash_profile'] = 'bash',
+	['.bashrc'] = 'bash',
+	['.bash_logout'] = 'bash',
+	['.shinit'] = 'bash',
+	['.xprofile'] = 'bash',
+	xsin = 'xs',
+	xsrc = 'xs',
+	Vagrantfile = 'ruby',
+	Dockerfile = 'dockerfile',
+	group = 'dsv',
+	gshadow = 'dsv',
+	passwd = 'dsv',
+	shadow = 'dsv',
+	fstab = 'fstab',
+	COMMIT_EDITMSG = 'git-commit',
+	["git%-rebase%-todo"] = 'git-rebase',
+	Jenkinsfile = 'groovy',
+	GNUmakefile = 'makefile',
+	makefile = 'makefile',
+	Makefile = 'makefile',
+	['meson.build'] = 'meson',
+	['meson.options'] = 'meson',
+	['meson_options.txt'] = 'meson',
+	PKGBUILD = 'pkgbuild',
+}
+M.filenames = filenames
 
 local extensions = {
 	gmi = 'gmi',
@@ -368,7 +379,8 @@ local extensions = {
 	fpp = "fortran",
 	frm = "vb",
 	frt = "forth",
-	fs = "forth",
+	fs = "forth", -- DUPLICATE
+--	fs = "fsharp", -- DUPLICATE
 	fth = "forth",
 	ftn = "fortran",
 	fun = "sml",
@@ -398,7 +410,7 @@ local extensions = {
 	ig = "modula3",
 	ily = "lilypond",
 	inc = "php",
-	inf = "ini",
+	inf = "inform",
 	ini = "ini",
 	inp = "apdl",
 	ins = "latex",
@@ -627,6 +639,7 @@ local utilities = {
 	python3 = 'python',
 
 	rc = 'rc',
+	es = 'rc',
 
 	tclsh = 'tcl',
 	jimsh = 'tcl',
@@ -680,7 +693,6 @@ local function GetHashBang(data)
 	return fullhb, utility
 end
 
-
 vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 	local path = win.file.name -- filepath
 	local mime
@@ -692,8 +704,14 @@ vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 			vis:command(cmd)
 		end
 		syntax = filetype.alt_name or syntax
-		if syntax then
+		if package.searchpath("lexers." .. syntax, package.path) then
 			win:set_syntax(syntax)
+		else
+			vis:info(
+				string.format(
+					"Syntax '%s' not found", syntax
+				)
+			)
 		end
 		return nil
 	end
@@ -711,6 +729,10 @@ vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 		end
 
 		if name and #name > 0 then
+			if filenames[name] then
+				return set_filetype(filenames[name])
+			end
+
 			-- detect filetype by filename ending with a configured extension
 			local ext = name:match"%.([^%.]+)$"
 			if ext then
