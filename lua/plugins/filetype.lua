@@ -180,9 +180,7 @@ vis.ftdetect.filetypes = {
   rexx = {},
   rhtml = {},
   routeros = {
-	detect = function(_, data)
-		return data:match("^#.* by RouterOS")
-	end,
+datap = "^#.* by RouterOS"
   },
   rpmspec = {},
   ruby = {
@@ -201,9 +199,7 @@ vis.ftdetect.filetypes = {
   spin = {},
   sql = {},
   strace = {
-	detect = function(_, data)
-		return data:match("^execve%(")
-	end
+datap = "^execve%("
   },
   systemd = {},
   taskpaper = {},
@@ -764,7 +760,10 @@ vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 	local data = file:content(0, 256)
 	if data and #data > 0 then
 		for lang, ft in pairs(vis.ftdetect.filetypes) do
-			if type(ft.detect) == 'function' and ft.detect(file, data) then
+			if
+				ft.datap and data:find(ft.datap)
+				or type(ft.detect) == 'function' and ft.detect(file, data)
+			then
 				return set_filetype(lang)
 			end
 		end
