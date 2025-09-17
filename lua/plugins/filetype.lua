@@ -412,7 +412,7 @@ local extensions = {
 	groovy = "groovy",
 	gtkrc = "gtkrc",
 	gvy = "groovy",
-	h = "cpp",
+	h = "c",
 	["h++"] = "cpp",
 	ha = "hare",
 	hh = "cpp",
@@ -848,4 +848,3 @@ vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 
 	win:set_syntax(nil)
 end)
-
