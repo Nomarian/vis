@@ -23,14 +23,12 @@ vis.ftdetect.filetypes = {
   },
   bash = {
     ext = { "^APKBUILD$", "^.bashrc$", "^.bash_profile$" },
-    mime = { "text/x-shellscript", "application/x-shellscript" },
     utility = { "^[db]ash$", "^sh$", "^t?csh$", "^zsh$" }
   },
   batch = {},
   bibtex = {},
   boo = {},
   c = {
-    mime = { "text/x-c" }
   },
   caml = {},
   chuck = {},
@@ -39,10 +37,8 @@ vis.ftdetect.filetypes = {
     ext = { "%.cmake.in$", "%.ctest.in$" }
   },
   coffeescript = {
-    mime = { "text/x-coffee" }
   },
   cpp = {
-    mime = { "text/x-c++" }
   },
   crontab = {
     cmd = { "set savemethod inplace" },
@@ -51,7 +47,6 @@ vis.ftdetect.filetypes = {
   crystal = {},
   csharp = {},
   css = {
-    mime = { "text/x-css" }
   },
   cuda = {},
   d = {},
@@ -84,7 +79,6 @@ vis.ftdetect.filetypes = {
   },
   gap = {},
   gemini = {
-    mime = { "text/gemini" }
   },
   gettext = {},
   gherkin = {},
@@ -107,10 +101,8 @@ vis.ftdetect.filetypes = {
   gtkrc = {},
   hare = {},
   haskell = {
-    mime = { "text/x-haskell" }
   },
   html = {
-    mime = { "text/x-html" }
   },
   icon = {},
   idl = {},
@@ -121,36 +113,30 @@ vis.ftdetect.filetypes = {
   javascript = {},
   jq = {},
   json = {
-    mime = { "text/x-json" }
   },
   jsp = {},
   julia = {},
   latex = {
-    mime = { "text/x-tex" }
   },
   ledger = {},
   less = {},
   lilypond = {},
   lisp = {
-    mime = { "text/x-lisp" }
   },
   litcoffee = {},
   logtalk = {},
   lua = {
-    mime = { "text/x-lua" },
     utility = { "^lua%-?5?%d?$", "^lua%-?5%.%d$" }
   },
   mail = {},
   makefile = {
     ext = { "^GNUmakefile$", "^makefile$", "^Makefile$" },
     hashbang = { "^#!/usr/bin/make" },
-    mime = { "text/x-makefile" },
     utility = { "^make$" }
   },
   man = {
   },
   markdown = {
-    mime = { "text/x-markdown" }
   },
   mediawiki = {},
   meson = {
@@ -159,7 +145,6 @@ vis.ftdetect.filetypes = {
   modula2 = {},
   modula3 = {},
   moonscript = {
-    mime = { "text/x-moon" }
   },
   myrddin = {},
   nemerle = {},
@@ -168,12 +153,10 @@ vis.ftdetect.filetypes = {
   nix = {},
   nsis = {},
   objective_c = {
-    mime = { "text/x-objc" }
   },
   org = {},
   pascal = {},
   perl = {
-    mime = { "text/x-perl" }
   },
   php = {},
   pico8 = {},
@@ -189,7 +172,6 @@ vis.ftdetect.filetypes = {
   ps = {},
   pure = {},
   python = {
-    mime = { "text/x-python", "text/x-script.python" },
     utility = { "^python%d?" }
   },
   r = {
@@ -211,16 +193,12 @@ vis.ftdetect.filetypes = {
   rpmspec = {},
   ruby = {
     ext = { "^Vagrantfile$" },
-    mime = { "text/x-ruby" }
   },
   rust = {
-    mime = { "text/x-rust" }
   },
   sass = {
-    mime = { "text/x-sass", "text/x-scss" }
   },
   scala = {
-    mime = { "text/x-scala" }
   },
   scheme = {},
   smalltalk = {},
@@ -251,14 +229,12 @@ vis.ftdetect.filetypes = {
   vhdl = {},
   wsf = {},
   xml = {
-    mime = { "text/xml" }
   },
   xs = {
     ext = { "^%.xsin$", "^%.xsrc$" }
   },
   xtend = {},
   yaml = {
-    mime = { "text/x-yaml" }
   },
   zig = {}
 }
@@ -618,19 +594,38 @@ local extensions = {
 }
 M.extensions = extensions
 
-M.mimes = {}
-for lang_name, lang in pairs(M.filetypes) do
-	for i, mime in ipairs(lang.mime or {}) do
-		if M.mimes[mime] then
-			error("mime " .. mime .. " already exists?")
-		end
-		if not mime:find"/" then
-			mime = "text/" .. mime
-		end
-		M.mimes[mime] = lang_name
-	end
-end
-
+-- Lookup table for mime [mime] = "lexer"
+-- "text/" is prepended so you can omit it
+local mimes = {
+  gemini = "gemini",
+  xml = "xml",
+  ["application/x-shellscript"] = "bash",
+  ["x-c"] = "c",
+  ["x-c++"] = "cpp",
+  ["x-coffee"] = "coffeescript",
+  ["x-css"] = "css",
+  ["x-haskell"] = "haskell",
+  ["x-html"] = "html",
+  ["x-json"] = "json",
+  ["x-lisp"] = "lisp",
+  ["x-lua"] = "lua",
+  ["x-makefile"] = "makefile",
+  ["x-markdown"] = "markdown",
+  ["x-moon"] = "moonscript",
+  ["x-objc"] = "objective_c",
+  ["x-perl"] = "perl",
+  ["x-python"] = "python",
+  ["x-ruby"] = "ruby",
+  ["x-rust"] = "rust",
+  ["x-sass"] = "sass",
+  ["x-scala"] = "scala",
+  ["x-script.python"] = "python",
+  ["x-scss"] = "sass",
+  ["x-shellscript"] = "bash",
+  ["x-tex"] = "latex",
+  ["x-yaml"] = "yaml",
+}
+M.mimes = mimes
 
 -- string.find(table, pattern)
 local function TStringFind(tbl, subject)
@@ -731,8 +726,11 @@ vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 		)
 		mime = file:read('*l')
 		file:close()
-		if mime and M.mimes[mime] then
-			return set_filetype(M.mimes[mime])
+		if mime then
+			local lexer = mimes[mime] or mimes["text/" .. mime]
+			if lexer then
+				return set_filetype(lexer)
+			end
 		end
 	end
 
