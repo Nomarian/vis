@@ -22,7 +22,7 @@ vis.ftdetect.filetypes = {
     utility = { "^[mgn]?awk$", "^goawk$" }
   },
   bash = {
-    ext = { "^APKBUILD$", "^.bashrc$", "^.bash_profile$" },
+    name = { "^APKBUILD$", "^.bashrc$", "^.bash_profile$" },
     utility = { "^[db]ash$", "^sh$", "^t?csh$", "^zsh$" }
   },
   batch = {},
@@ -34,7 +34,7 @@ vis.ftdetect.filetypes = {
   chuck = {},
   clojure = {},
   cmake = {
-    ext = { "%.cmake.in$", "%.ctest.in$" }
+    name = { "%.cmake.in$", "%.ctest.in$" }
   },
   coffeescript = {
   },
@@ -42,7 +42,7 @@ vis.ftdetect.filetypes = {
   },
   crontab = {
     cmd = { "set savemethod inplace" },
-    ext = { "^crontab.*$" }
+    name = { "^crontab.*$" }
   },
   crystal = {},
   csharp = {},
@@ -54,11 +54,11 @@ vis.ftdetect.filetypes = {
   desktop = {},
   diff = {},
   dockerfile = {
-    ext = { "^Dockerfile$" }
+    name = { "^Dockerfile$" }
   },
   dot = {},
   dsv = {
-    ext = { "^group$", "^gshadow$", "^passwd$", "^shadow$" }
+    name = { "^group$", "^gshadow$", "^passwd$", "^shadow$" }
   },
   eiffel = {},
   elixir = {},
@@ -75,7 +75,7 @@ vis.ftdetect.filetypes = {
   fortran = {},
   fsharp = {},
   fstab = {
-    ext = { "^fstab$" }
+    name = { "^fstab$" }
   },
   gap = {},
   gemini = {
@@ -85,10 +85,10 @@ vis.ftdetect.filetypes = {
   ["git-commit"] = {
     alt_name = "diff",
     cmd = { "set colorcolumn 72" },
-    ext = { "^COMMIT_EDITMSG$" }
+    name = { "^COMMIT_EDITMSG$" }
   },
   ["git-rebase"] = {
-    ext = { "git%-rebase%-todo" }
+    name = { "git%-rebase%-todo" }
   },
   gleam = {},
   glsl = {
@@ -96,7 +96,7 @@ vis.ftdetect.filetypes = {
   gnuplot = {},
   go = {},
   groovy = {
-    ext = { "^Jenkinsfile$" }
+    name = { "^Jenkinsfile$" }
   },
   gtkrc = {},
   hare = {},
@@ -130,7 +130,7 @@ vis.ftdetect.filetypes = {
   },
   mail = {},
   makefile = {
-    ext = { "^GNUmakefile$", "^makefile$", "^Makefile$" },
+    name = { "^GNUmakefile$", "^makefile$", "^Makefile$" },
     hashbang = { "^#!/usr/bin/make" },
     utility = { "^make$" }
   },
@@ -140,7 +140,7 @@ vis.ftdetect.filetypes = {
   },
   mediawiki = {},
   meson = {
-    ext = { "^meson%.build$", "^meson_options%.txt$", "^meson%.options$" }
+    name = { "^meson%.build$", "^meson_options%.txt$", "^meson%.options$" }
   },
   modula2 = {},
   modula3 = {},
@@ -162,7 +162,7 @@ vis.ftdetect.filetypes = {
   pico8 = {},
   pike = {},
   pkgbuild = {
-    ext = { "^PKGBUILD$" }
+    name = { "^PKGBUILD$" }
   },
   pony = {},
   powershell = {},
@@ -175,7 +175,7 @@ vis.ftdetect.filetypes = {
     utility = { "^python%d?" }
   },
   r = {
-    ext = { "Rout.save", "Rout.fail" }
+    name = { "Rout.save", "Rout.fail" }
   },
   rc = {
     utility = { "^rc$" }
@@ -192,7 +192,7 @@ vis.ftdetect.filetypes = {
   },
   rpmspec = {},
   ruby = {
-    ext = { "^Vagrantfile$" },
+    name = { "^Vagrantfile$" },
   },
   rust = {
   },
@@ -231,7 +231,7 @@ vis.ftdetect.filetypes = {
   xml = {
   },
   xs = {
-    ext = { "^%.xsin$", "^%.xsrc$" }
+    name = { "^%.xsin$", "^%.xsrc$" }
   },
   xtend = {},
   yaml = {
@@ -710,7 +710,7 @@ vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 			end
 			-- detect filetype by filename pattern
 			for lang, ft in pairs(vis.ftdetect.filetypes) do
-				for _, pattern in ipairs(ft.ext or {}) do
+				for _, pattern in ipairs(ft.name or {}) do
 					if name:match(pattern) then
 						return set_filetype(lang)
 					end
