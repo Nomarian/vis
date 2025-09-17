@@ -19,7 +19,11 @@ vis.ftdetect.filetypes = {
 	autoit = {},
 	awk = {},
 	bash = {
-		name = { "^APKBUILD$", "^.bashrc$", "^.bash_profile$" },
+		name = {
+			"^APKBUILD$", "^%.login$", "^%.profile$",
+			"%.bashrc$", '^%.bash.logout$', "^%.bash_profile$", "^%.bash_login$",
+			"^%.mkshrc$"
+		},
 	},
 	batch = {},
 	bibtex = {},
