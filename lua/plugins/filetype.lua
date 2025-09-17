@@ -6,6 +6,15 @@ vis.ftdetect.ignoresuffixes = {
 	"~+$", "%.orig$", "%.bak$", "%.old$", "%.new$"
 }
 
+--[[
+[lexer] = {
+	alt_name = "" -- alt lexer name
+	name = { lua pattern string list }
+	cmd = { vis:command() list of strings }
+	utility = {} list of patterns for the hashbang utility (no paths)
+	datap = {} patterns for the first 256 characters of the file}
+}
+--]]
 vis.ftdetect.filetypes = {
 	actionscript = {},
 	ada = {},
@@ -21,7 +30,7 @@ vis.ftdetect.filetypes = {
 	bash = {
 		name = {
 			"^APKBUILD$", "^%.login$", "^%.profile$",
-			"%.bashrc$", '^%.bash.logout$', "^%.bash_profile$", "^%.bash_login$",
+			"%.bashrc$", "^%.bash_profile$", '^%.bash.logout$', "^%.bash_login$",
 			"^%.mkshrc$"
 		},
 	},
@@ -164,7 +173,7 @@ vis.ftdetect.filetypes = {
 	rexx = {},
 	rhtml = {},
 	routeros = {
-		datap = "^#.* by RouterOS"
+		datap = { "^#.* by RouterOS" }
 	},
 	rpmspec = {},
 	ruby = {
@@ -180,7 +189,7 @@ vis.ftdetect.filetypes = {
 	spin = {},
 	sql = {},
 	strace = {
-		datap = "^execve%("
+		datap = { "^execve%(" }
 	},
 	systemd = {},
 	taskpaper = {},
@@ -564,33 +573,33 @@ M.extensions = extensions
 -- Lookup table for mime [mime] = "lexer"
 -- "text/" is prepended so you can omit it
 local mimes = {
-  gemini = "gemini",
-  xml = "xml",
-  ["application/x-shellscript"] = "bash",
-  ["x-c"] = "c",
-  ["x-c++"] = "cpp",
-  ["x-coffee"] = "coffeescript",
-  ["x-css"] = "css",
-  ["x-haskell"] = "haskell",
-  ["x-html"] = "html",
-  ["x-json"] = "json",
-  ["x-lisp"] = "lisp",
-  ["x-lua"] = "lua",
-  ["x-makefile"] = "makefile",
-  ["x-markdown"] = "markdown",
-  ["x-moon"] = "moonscript",
-  ["x-objc"] = "objective_c",
-  ["x-perl"] = "perl",
-  ["x-python"] = "python",
-  ["x-ruby"] = "ruby",
-  ["x-rust"] = "rust",
-  ["x-sass"] = "sass",
-  ["x-scala"] = "scala",
-  ["x-script.python"] = "python",
-  ["x-scss"] = "sass",
-  ["x-shellscript"] = "bash",
-  ["x-tex"] = "latex",
-  ["x-yaml"] = "yaml",
+	gemini = "gemini",
+	xml = "xml",
+	["application/x-shellscript"] = "bash",
+	["x-c"] = "c",
+	["x-c++"] = "cpp",
+	["x-coffee"] = "coffeescript",
+	["x-css"] = "css",
+	["x-haskell"] = "haskell",
+	["x-html"] = "html",
+	["x-json"] = "json",
+	["x-lisp"] = "lisp",
+	["x-lua"] = "lua",
+	["x-makefile"] = "makefile",
+	["x-markdown"] = "markdown",
+	["x-moon"] = "moonscript",
+	["x-objc"] = "objective_c",
+	["x-perl"] = "perl",
+	["x-python"] = "python",
+	["x-ruby"] = "ruby",
+	["x-rust"] = "rust",
+	["x-sass"] = "sass",
+	["x-scala"] = "scala",
+	["x-script.python"] = "python",
+	["x-scss"] = "sass",
+	["x-shellscript"] = "bash",
+	["x-tex"] = "latex",
+	["x-yaml"] = "yaml",
 }
 M.mimes = mimes
 
@@ -682,7 +691,10 @@ vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 		for _, cmd in pairs(filetype.cmd or {}) do
 			vis:command(cmd)
 		end
-		win:set_syntax(filetype.alt_name or syntax)
+		syntax = filetype.alt_name or syntax
+		if syntax then
+			win:set_syntax(syntax)
+		end
 		return nil
 	end
 
@@ -739,7 +751,7 @@ vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 	if data and #data > 0 then
 		for lang, ft in pairs(vis.ftdetect.filetypes) do
 			if
-				ft.datap and data:find(ft.datap)
+				TStringFind(ft.datap, data)
 				or type(ft.detect) == 'function' and ft.detect(file, data)
 			then
 				return set_filetype(lang)
@@ -754,8 +766,7 @@ vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 			for lang, ft in pairs(vis.ftdetect.filetypes) do
 				if
 					utility and TStringFind(ft.utility, utility)
-					or
-					fullhb and TStringFind(ft.hashbang, fullhb)
+					or TStringFind(ft.hashbang, fullhb)
 				then
 					return set_filetype(lang)
 				end
