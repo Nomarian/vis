@@ -144,6 +144,14 @@ vis.ftdetect.filetypes = {
 	r = {
 		name = { "Rout.save", "Rout.fail" }
 	},
+	rails = {
+		datap = {
+			'^%s*class%s+%S+%s*<%s*ApplicationController',
+			'^%s*class%s+%S+%s*<%s*ActionController::Base',
+			'^%s*class%s+%S+%s*<%s*ActiveRecord::Base',
+			'^%s*class%s+%S+%s*<%s*ActiveRecord::Migration',
+		}
+	},
 	rc = {},
 	reason = {},
 	rebol = {},
@@ -182,10 +190,18 @@ vis.ftdetect.filetypes = {
 	verilog = {},
 	vhdl = {},
 	wsf = {},
-	xml = {},
+	xml = {
+		datap = {
+			'^%s*<%?xml%s'
+		}
+	},
 	xs = {},
 	xtend = {},
-	yaml = {},
+	yaml = {
+		datap = {
+			'^#cloud%-config'
+		}
+	},
 	zig = {}
 }
 
@@ -645,6 +661,11 @@ local utilities = {
 	jimsh = 'tcl',
 
 	lua = 'lua',
+
+	octave = 'matlab',
+	perl = 'perl',
+	php = 'php',
+	ruby = 'ruby',
 }
 M.utils = utilities
 
