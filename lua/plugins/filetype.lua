@@ -7,225 +7,199 @@ vis.ftdetect.ignoresuffixes = {
 }
 
 vis.ftdetect.filetypes = {
-  actionscript = {},
-  ada = {},
-  antlr = {},
-  apdl = {},
-  apl = {},
-  applescript = {},
-  asciidoc = {},
-  asm = {},
-  asp = {},
-  autoit = {},
-  awk = {
-  },
-  bash = {
-    name = { "^APKBUILD$", "^.bashrc$", "^.bash_profile$" },
-  },
-  batch = {},
-  bibtex = {},
-  boo = {},
-  c = {
-  },
-  caml = {},
-  chuck = {},
-  clojure = {},
-  cmake = {
-    name = { "%.cmake.in$", "%.ctest.in$" }
-  },
-  coffeescript = {
-  },
-  cpp = {
-  },
-  crontab = {
-    cmd = { "set savemethod inplace" },
-    name = { "^crontab.*$" }
-  },
-  crystal = {},
-  csharp = {},
-  css = {
-  },
-  cuda = {},
-  d = {},
-  dart = {},
-  desktop = {},
-  diff = {},
-  dockerfile = {
-    name = { "^Dockerfile$" }
-  },
-  dot = {},
-  dsv = {
-    name = { "^group$", "^gshadow$", "^passwd$", "^shadow$" }
-  },
-  eiffel = {},
-  elixir = {},
-  elm = {},
-  erlang = {},
-  factor = {
-  },
-  fantom = {},
-  faust = {},
-  fennel = {},
-  fish = {
-  },
-  forth = {},
-  fortran = {},
-  fsharp = {},
-  fstab = {
-    name = { "^fstab$" }
-  },
-  gap = {},
-  gemini = {
-  },
-  gettext = {},
-  gherkin = {},
-  ["git-commit"] = {
-    alt_name = "diff",
-    cmd = { "set colorcolumn 72" },
-    name = { "^COMMIT_EDITMSG$" }
-  },
-  ["git-rebase"] = {
-    name = { "git%-rebase%-todo" }
-  },
-  gleam = {},
-  glsl = {
-  },
-  gnuplot = {},
-  go = {},
-  groovy = {
-    name = { "^Jenkinsfile$" }
-  },
-  gtkrc = {},
-  hare = {},
-  haskell = {
-  },
-  html = {
-  },
-  icon = {},
-  idl = {},
-  inform = {},
-  ini = {},
-  io_lang = {},
-  java = {},
-  javascript = {},
-  jq = {},
-  json = {
-  },
-  jsp = {},
-  julia = {},
-  latex = {
-  },
-  ledger = {},
-  less = {},
-  lilypond = {},
-  lisp = {
-  },
-  litcoffee = {},
-  logtalk = {},
-  lua = {
-    utility = { "^lua%-?5?%d?$", "^lua%-?5%.%d$" }
-  },
-  mail = {},
-  makefile = {
-    name = { "^GNUmakefile$", "^[Mm]akefile$" },
-  },
-  man = {
-  },
-  markdown = {
-  },
-  mediawiki = {},
-  meson = {
-    name = { "^meson%.build$", "^meson_options%.txt$", "^meson%.options$" }
-  },
-  modula2 = {},
-  modula3 = {},
-  moonscript = {
-  },
-  myrddin = {},
-  nemerle = {},
-  networkd = {},
-  nim = {},
-  nix = {},
-  nsis = {},
-  objective_c = {
-  },
-  org = {},
-  pascal = {},
-  perl = {
-  },
-  php = {},
-  pico8 = {},
-  pike = {},
-  pkgbuild = {
-    name = { "^PKGBUILD$" }
-  },
-  pony = {},
-  powershell = {},
-  prolog = {},
-  props = {},
-  protobuf = {},
-  ps = {},
-  pure = {},
-  python = {
-    utility = { "^python%d?" }
-  },
-  r = {
-    name = { "Rout.save", "Rout.fail" }
-  },
-  rc = {
-  },
-  reason = {},
-  rebol = {},
-  rest = {},
-  rexx = {},
-  rhtml = {},
-  routeros = {
-datap = "^#.* by RouterOS"
-  },
-  rpmspec = {},
-  ruby = {
-    name = { "^Vagrantfile$" },
-  },
-  rust = {
-  },
-  sass = {
-  },
-  scala = {
-  },
-  scheme = {},
-  smalltalk = {},
-  sml = {},
-  snobol4 = {},
-  spin = {},
-  sql = {},
-  strace = {
-datap = "^execve%("
-  },
-  systemd = {},
-  taskpaper = {},
-  tcl = {
-  },
-  texinfo = {},
-  text = {},
-  toml = {},
-  typescript = {},
-  typst = {},
-  usfm = {},
-  vala = {},
-  vb = {},
-  vcard = {},
-  verilog = {},
-  vhdl = {},
-  wsf = {},
-  xml = {
-  },
-  xs = {
-    name = { "^%.xsin$", "^%.xsrc$" }
-  },
-  xtend = {},
-  yaml = {
-  },
-  zig = {}
+	actionscript = {},
+	ada = {},
+	antlr = {},
+	apdl = {},
+	apl = {},
+	applescript = {},
+	asciidoc = {},
+	asm = {},
+	asp = {},
+	autoit = {},
+	awk = {},
+	bash = {
+		name = { "^APKBUILD$", "^.bashrc$", "^.bash_profile$" },
+	},
+	batch = {},
+	bibtex = {},
+	boo = {},
+	c = {},
+	caml = {},
+	chuck = {},
+	clojure = {},
+	cmake = {
+		name = { "%.cmake.in$", "%.ctest.in$" }
+	},
+	coffeescript = {},
+	cpp = {},
+	crontab = {
+		cmd = { "set savemethod inplace" },
+		name = { "^crontab.*$" }
+	},
+	crystal = {},
+	csharp = {},
+	css = {},
+	cuda = {},
+	d = {},
+	dart = {},
+	desktop = {},
+	diff = {},
+	dockerfile = {
+		name = { "^Dockerfile$" }
+	},
+	dot = {},
+	dsv = {
+		name = { "^group$", "^gshadow$", "^passwd$", "^shadow$" }
+	},
+	eiffel = {},
+	elixir = {},
+	elm = {},
+	erlang = {},
+	factor = {},
+	fantom = {},
+	faust = {},
+	fennel = {},
+	fish = {},
+	forth = {},
+	fortran = {},
+	fsharp = {},
+	fstab = {
+		name = { "^fstab$" }
+	},
+	gap = {},
+	gemini = {},
+	gettext = {},
+	gherkin = {},
+	["git-commit"] = {
+		alt_name = "diff",
+		cmd = { "set colorcolumn 72" },
+		name = { "^COMMIT_EDITMSG$" }
+	},
+	["git-rebase"] = {
+		name = { "git%-rebase%-todo" }
+	},
+	gleam = {},
+	glsl = {},
+	gnuplot = {},
+	go = {},
+	groovy = {
+		name = { "^Jenkinsfile$" }
+	},
+	gtkrc = {},
+	hare = {},
+	haskell = {},
+	html = {},
+	icon = {},
+	idl = {},
+	inform = {},
+	ini = {},
+	io_lang = {},
+	java = {},
+	javascript = {},
+	jq = {},
+	json = {},
+	jsp = {},
+	julia = {},
+	latex = {},
+	ledger = {},
+	less = {},
+	lilypond = {},
+	lisp = {},
+	litcoffee = {},
+	logtalk = {},
+	lua = {
+		utility = { "^lua%-?5?%d?$", "^lua%-?5%.%d$" }
+	},
+	mail = {},
+	makefile = {
+		name = { "^GNUmakefile$", "^[Mm]akefile$" },
+	},
+	man = {},
+	markdown = {},
+	mediawiki = {},
+	meson = {
+		name = { "^meson%.build$", "^meson_options%.txt$", "^meson%.options$" }
+	},
+	modula2 = {},
+	modula3 = {},
+	moonscript = {},
+	myrddin = {},
+	nemerle = {},
+	networkd = {},
+	nim = {},
+	nix = {},
+	nsis = {},
+	objective_c = {},
+	org = {},
+	pascal = {},
+	perl = {},
+	php = {},
+	pico8 = {},
+	pike = {},
+	pkgbuild = {
+		name = { "^PKGBUILD$" }
+	},
+	pony = {},
+	powershell = {},
+	prolog = {},
+	props = {},
+	protobuf = {},
+	ps = {},
+	pure = {},
+	python = {
+		utility = { "^python%d?" }
+	},
+	r = {
+		name = { "Rout.save", "Rout.fail" }
+	},
+	rc = {},
+	reason = {},
+	rebol = {},
+	rest = {},
+	rexx = {},
+	rhtml = {},
+	routeros = {
+		datap = "^#.* by RouterOS"
+	},
+	rpmspec = {},
+	ruby = {
+		name = { "^Vagrantfile$" },
+	},
+	rust = {},
+	sass = {},
+	scala = {},
+	scheme = {},
+	smalltalk = {},
+	sml = {},
+	snobol4 = {},
+	spin = {},
+	sql = {},
+	strace = {
+		datap = "^execve%("
+	},
+	systemd = {},
+	taskpaper = {},
+	tcl = {},
+	texinfo = {},
+	text = {},
+	toml = {},
+	typescript = {},
+	typst = {},
+	usfm = {},
+	vala = {},
+	vb = {},
+	vcard = {},
+	verilog = {},
+	vhdl = {},
+	wsf = {},
+	xml = {},
+	xs = {
+		name = { "^%.xsin$", "^%.xsrc$" }
+	},
+	xtend = {},
+	yaml = {},
+	zig = {}
 }
 
 local extensions = {
