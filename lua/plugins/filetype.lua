@@ -662,7 +662,7 @@ local function GetHashBang(data)
 				-- (hopefully) whatever is left in field[1] should be the utility or nil
 			end
 		end
-		utility = string.find(field[1] or "", "[^/]+$") -- remove filepath
+		utility = string.match(field[1] or "", "[^/]+$") -- remove filepath
 	end
 	return fullhb, utility
 end
