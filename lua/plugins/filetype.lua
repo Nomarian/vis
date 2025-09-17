@@ -18,12 +18,9 @@ vis.ftdetect.filetypes = {
   asp = {},
   autoit = {},
   awk = {
-    hashbang = { "^/usr/bin/[mng]awk%s+%-f" },
-    utility = { "^[mgn]?awk$", "^goawk$" }
   },
   bash = {
     name = { "^APKBUILD$", "^.bashrc$", "^.bash_profile$" },
-    utility = { "^[db]ash$", "^sh$", "^t?csh$", "^zsh$" }
   },
   batch = {},
   bibtex = {},
@@ -130,9 +127,7 @@ vis.ftdetect.filetypes = {
   },
   mail = {},
   makefile = {
-    name = { "^GNUmakefile$", "^makefile$", "^Makefile$" },
-    hashbang = { "^#!/usr/bin/make" },
-    utility = { "^make$" }
+    name = { "^GNUmakefile$", "^[Mm]akefile$" },
   },
   man = {
   },
@@ -178,7 +173,6 @@ vis.ftdetect.filetypes = {
     name = { "Rout.save", "Rout.fail" }
   },
   rc = {
-    utility = { "^rc$" }
   },
   reason = {},
   rebol = {},
@@ -214,7 +208,6 @@ vis.ftdetect.filetypes = {
   systemd = {},
   taskpaper = {},
   tcl = {
-    utility = { "^tclsh$", "^jimsh$" }
   },
   texinfo = {},
   text = {},
@@ -627,6 +620,36 @@ local mimes = {
 }
 M.mimes = mimes
 
+local utilities = {
+	awk = 'awk',
+	mawk = 'awk',
+	nawk = 'awk',
+	gawk = 'awk',
+	goawk = 'awk',
+
+	sh = 'bash',
+	bash = 'bash',
+	ash = 'bash',
+	ksh = 'bash',
+	mksh = 'bash',
+	csh = 'bash',
+	tcsh = 'bash',
+	zsh = 'bash',
+	dash = 'bash',
+
+	make = 'make',
+
+	python = 'python',
+	python2 = 'python',
+	python3 = 'python',
+
+	rc = 'rc',
+
+	tclsh = 'tcl',
+	jimsh = 'tcl',
+}
+M.utils = utilities
+
 -- string.find(table, pattern)
 local function TStringFind(tbl, subject)
 	for _, pattern in ipairs(tbl or {}) do
@@ -703,7 +726,7 @@ vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 			-- detect filetype by filename ending with a configured extension
 			local ext = name:match"%.([^%.]+)$"
 			if ext then
-				local lexer = extensions[ext] or M.extensions[ext:lower()]
+				local lexer = extensions[ext] or extensions[ext:lower()]
 				if lexer then
 					return set_filetype(lexer)
 				end
@@ -745,8 +768,10 @@ vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 		end
 
 		local fullhb, utility = GetHashBang(data)
-
-		if utility or fullhb then
+		if fullhb then
+			if utility and utilities[utility] then
+				return set_filetype(utilities[utility])
+			end
 			for lang, ft in pairs(vis.ftdetect.filetypes) do
 				if
 					utility and TStringFind(ft.utility, utility)
