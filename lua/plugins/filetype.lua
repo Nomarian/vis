@@ -141,9 +141,7 @@ vis.ftdetect.filetypes = {
 	python = {
 		utility = { "^python%d?" }
 	},
-	r = {
-		name = { "Rout.save", "Rout.fail" }
-	},
+	r = {},
 	rails = {
 		datap = {
 			'^%s*class%s+%S+%s*<%s*ApplicationController',
@@ -738,11 +736,105 @@ local function GetHashBang(data)
 	return fullhb, utility
 end
 
-vis.events.subscribe(vis.events.WIN_OPEN, function(win)
-	local path = win.file.name -- filepath
-	local mime
+-- Returns syntax filetype
+-- Correctness order:
+-- utility -> datap -> detect -> filename -> extension -> mime
+-- Some extensions are duplicated, so they are low priority.
+-- Technically in terms of quickness it should be
+-- extension -> filename -> utility -> hashbang -> mime
 
-	local set_filetype = function(syntax)
+-- Mimes is supposed to be the most correct, but its a fork to file
+-- Which is slow, and semi non-portable
+local function Detect(win)
+	local file = win.file
+
+	-- pass first few bytes of file to custom file type detector functions
+	local data = file:content(0, 256)
+	if data and #data > 0 then
+		local fullhb, utility = GetHashBang(data)
+		if fullhb then
+			if utility and utilities[utility] then
+				return utilities[utility]
+			end
+			for lang, ft in pairs(M.filetypes) do
+				if
+					utility and TStringFind(ft.utility, utility)
+					or TStringFind(ft.hashbang, fullhb)
+					-- Same as below but saves us a loop
+					or (ft.detect and ft.detect(file, data))
+				then
+					return lang
+				end
+			end
+		else
+			for lang, ft in pairs(M.filetypes) do
+				if
+					TStringFind(ft.datap, data)
+					or type(ft.detect) == 'function' and ft.detect(file, data)
+				then
+					return lang
+				end
+			end
+		end
+	end
+
+	local mime
+	local path = file.name -- filepath
+	if path and path~="" then
+		local name = path and path:match("[^/]+$") -- filename
+		if name then
+			local unchanged
+			while #name > 0 and name ~= unchanged do
+				unchanged = name
+				for _, pattern in ipairs(M.ignoresuffixes) do
+					name = name:gsub(pattern, "")
+				end
+			end
+		end
+
+		if name and #name > 0 then
+			if filenames[name] then return filenames[name] end
+
+			-- detect filetype by filename ending with a configured extension
+			local ext = name:match"%.([^%.]+)$"
+			if ext then
+				local lexer = extensions[ext] or extensions[ext:lower()]
+				if lexer then return lexer end
+			end
+
+			-- detect filetype by filename pattern
+			for lang, ft in pairs(M.filetypes) do
+				for _, pattern in ipairs(ft.name or {}) do
+					if name:find(pattern) then return lang end
+				end
+			end
+		end
+
+		-- run file(1) to determine mime type
+		local fileh = io.popen(
+			string.format(
+				"file -bL --mime-type -- '%s'", path:gsub("'", "'\\''")
+			)
+		)
+		mime = fileh:read('*l')
+		fileh:close()
+		if mime then
+			local lexer = mimes[mime] or mimes["text/" .. mime]
+			if lexer then return lexer end
+		end
+	end
+
+	-- try text lexer as a last resort
+	if (mime or 'text/plain'):match('^text/.+$') then
+		return 'text'
+	end
+
+	return nil
+end
+
+vis.events.subscribe(vis.events.WIN_OPEN, function(win)
+	local syntax = Detect(win)
+	if syntax then
 		-- Cannot move because of win
 		local filetype = M.filetypes[syntax]
 		for _, cmd in pairs(filetype.cmd or {}) do
@@ -751,6 +843,7 @@ vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 		syntax = filetype.alt_name or syntax
 		if package.searchpath("lexers." .. syntax, package.path) then
 			win:set_syntax(syntax)
+			return
 		else
 			vis:info(
 				string.format(
@@ -758,93 +851,8 @@ vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 				)
 			)
 		end
-		return nil
 	end
-
-	if path and #path > 0 then
-		local name = path:match("[^/]+$") -- filename
-		if name then
-			local unchanged
-			while #name > 0 and name ~= unchanged do
-				unchanged = name
-				for _, pattern in ipairs(vis.ftdetect.ignoresuffixes) do
-					name = name:gsub(pattern, "")
-				end
-			end
-		end
-
-		if name and #name > 0 then
-			if filenames[name] then
-				return set_filetype(filenames[name])
-			end
-
-			-- detect filetype by filename ending with a configured extension
-			local ext = name:match"%.([^%.]+)$"
-			if ext then
-				local lexer = extensions[ext] or extensions[ext:lower()]
-				if lexer then
-					return set_filetype(lexer)
-				end
-			end
-			-- detect filetype by filename pattern
-			for lang, ft in pairs(vis.ftdetect.filetypes) do
-				for _, pattern in ipairs(ft.name or {}) do
-					if name:match(pattern) then
-						return set_filetype(lang)
-					end
-				end
-			end
-		end
-
-		-- run file(1) to determine mime type
-		local file = io.popen(
-			string.format(
-				"file -bL --mime-type -- '%s'", path:gsub("'", "'\\''")
-			)
-		)
-		mime = file:read('*l')
-		file:close()
-		if mime then
-			local lexer = mimes[mime] or mimes["text/" .. mime]
-			if lexer then
-				return set_filetype(lexer)
-			end
-		end
-	end
-
-	-- pass first few bytes of file to custom file type detector functions
-	local file = win.file
-	local data = file:content(0, 256)
-	if data and #data > 0 then
-		for lang, ft in pairs(vis.ftdetect.filetypes) do
-			if
-				TStringFind(ft.datap, data)
-				or type(ft.detect) == 'function' and ft.detect(file, data)
-			then
-				return set_filetype(lang)
-			end
-		end
-
-		local fullhb, utility = GetHashBang(data)
-		if fullhb then
-			if utility and utilities[utility] then
-				return set_filetype(utilities[utility])
-			end
-			for lang, ft in pairs(vis.ftdetect.filetypes) do
-				if
-					utility and TStringFind(ft.utility, utility)
-					or TStringFind(ft.hashbang, fullhb)
-				then
-					return set_filetype(lang)
-				end
-			end
-		end
-	end
-
-	-- try text lexer as a last resort
-	if (mime or 'text/plain'):match('^text/.+$') then
-		return set_filetype('text')
-	end
-
 	win:set_syntax(nil)
+	return nil
 end)
+
