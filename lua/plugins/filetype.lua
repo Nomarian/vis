@@ -1,4 +1,5 @@
 
+local L = require"lexers.lexer"
 local M = {}
 vis.ftdetect = M
 
@@ -142,23 +143,14 @@ vis.ftdetect.filetypes = {
 		utility = { "^python%d?" }
 	},
 	r = {},
-	rails = {
-		datap = {
-			'^%s*class%s+%S+%s*<%s*ApplicationController',
-			'^%s*class%s+%S+%s*<%s*ActionController::Base',
-			'^%s*class%s+%S+%s*<%s*ActiveRecord::Base',
-			'^%s*class%s+%S+%s*<%s*ActiveRecord::Migration',
-		}
-	},
+	rails = {},
 	rc = {},
 	reason = {},
 	rebol = {},
 	rest = {},
 	rexx = {},
 	rhtml = {},
-	routeros = {
-		datap = { "^#.* by RouterOS" }
-	},
+	routeros = {},
 	rpmspec = {},
 	ruby = {},
 	rust = {},
@@ -170,9 +162,7 @@ vis.ftdetect.filetypes = {
 	snobol4 = {},
 	spin = {},
 	sql = {},
-	strace = {
-		datap = { "^execve%(" }
-	},
+	strace = {},
 	systemd = {},
 	taskpaper = {},
 	tcl = {},
@@ -188,18 +178,10 @@ vis.ftdetect.filetypes = {
 	verilog = {},
 	vhdl = {},
 	wsf = {},
-	xml = {
-		datap = {
-			'^%s*<%?xml%s'
-		}
-	},
+	xml = {},
 	xs = {},
 	xtend = {},
-	yaml = {
-		datap = {
-			'^#cloud%-config'
-		}
-	},
+	yaml = {},
 	zig = {}
 }
 
@@ -240,385 +222,74 @@ local filenames = {
 }
 M.filenames = filenames
 
-local extensions = {
-	["1"] = "troff",
-	["1p"] = "man",
-	["1x"] = "troff",
-	["2"] = "troff",
-	["2p"] = "man",
-	["2x"] = "troff",
-	["3"] = "troff",
-	["3p"] = "man",
-	["3x"] = "troff",
-	["4"] = "troff",
-	["4p"] = "man",
-	["4x"] = "troff",
-	["5"] = "troff",
-	["5p"] = "man",
-	["5x"] = "troff",
-	["6"] = "troff",
-	["6p"] = "man",
-	["6x"] = "troff",
-	["7"] = "troff",
-	["7p"] = "man",
-	["7x"] = "troff",
-	["8"] = "troff",
-	["8p"] = "man",
-	["8x"] = "troff",
-	["9"] = "troff",
-	["9p"] = "man",
-	["9x"] = "troff",
-	ASM = "asm",
-	C = "c",
-	["CMakeLists.txt"] = "cmake",
-	Dockerfile = "dockerfile",
-	GNUmakefile = "makefile",
-	Makefile = "makefile",
-	PKGBUILD = "pkgbuild",
-	R = "r",
-	Rakefile = "ruby",
-	Rhistory = "r",
-	Rout = "r",
-	["Rout.fail"] = "r",
-	["Rout.save"] = "r",
-	Rt = "r",
-	S = "asm",
-	SNO = "snobol4",
-	a3x = "autoit",
-	adb = "ada",
-	adoc = "asciidoc",
-	ads = "ada",
-	ahk = "autohotkey",
-	al = "perl",
-	ans = "apdl",
-	apl = "apl",
-	applescript = "applescript",
-	as = "actionscript",
-	asa = "asp",
-	asc = "actionscript",
-	asm = "asm",
-	asp = "asp",
-	au3 = "autoit",
-	automount = "systemd",
-	awk = "awk",
-	bas = "vb",
-	bash = "bash",
-	bashrc = "bash",
-	bat = "batch",
-	bbl = "latex",
-	bib = "bibtex",
-	boo = "boo",
-	bsh = "java",
-	c = "c",
-	["c++"] = "cpp",
-	caml = "caml",
-	cc = "cpp",
-	cfg = "ini",
-	changes = "smalltalk",
-	cjs = "javascript",
-	ck = "chuck",
-	cl = "lisp",
-	clj = "clojure",
-	cljc = "clojure",
-	cljs = "clojure",
-	cls = "vb",
-	cmake = "cmake",
-	["cmake.in"] = "cmake",
-	cmd = "batch",
-	cnf = "ini",
-	coffee = "coffeescript",
-	conf = "ini",
-	configure = "bash",
-	container = "systemd",
-	cpp = "cpp",
-	cr = "crystal",
-	cs = "csharp",
-	csh = "bash",
-	css = "css",
-	ctest = "cmake",
-	["ctest.in"] = "cmake",
-	ctl = "vb",
-	cu = "cuda",
-	cuh = "cuda",
-	cxx = "cpp",
-	d = "d",
-	dart = "dart",
-	ddl = "sql",
-	def = "modula2",
-	dem = "gnuplot",
-	desktop = "desktop",
-	device = "systemd",
-	di = "d",
-	diff = "diff",
-	dob = "vb",
-	dot = "dot",
-	dpk = "pascal",
-	dpr = "pascal",
-	dsm = "vb",
-	dsp = "faust",
-	dsr = "vb",
-	dtd = "xml",
-	dtx = "latex",
-	e = "eiffel",
-	ebuild = "bash",
-	edn = "clojure",
-	eif = "eiffel",
-	el = "lisp",
-	elm = "elm",
-	eml = "mail",
-	eps = "ps",
-	erb = "rhtml",
-	erl = "erlang",
-	es = "rc",
-	ex = "elixir",
-	exs = "elixir",
-	f = "fortran",
-	f03 = "fortran",
-	f08 = "fortran",
-	f77 = "fortran",
-	f90 = "fortran",
-	f95 = "fortran",
-	factor = "factor",
-	fan = "fantom",
-	feature = "gherkin",
-	fish = "fish",
-	fnl = "fennel",
-	["for"] = "fortran",
-	forth = "forth",
-	fpp = "fortran",
-	frm = "vb",
-	frt = "forth",
-	fs = "fsharp",
---	fs = "forth", -- DUPLICATE
-	fstab = "fstab",
-	fth = "forth",
-	ftn = "fortran",
-	fun = "sml",
-	g = "antlr",
-	g4 = "antlr",
-	gap = "gap",
-	gd = "gap",
-	gi = "gap",
-	gleam = "gleam",
-	glif = "xml",
-	glsl = "glsl",
-	glslf = "glsl",
-	glslv = "glsl",
-	gmi = "gemini",
-	go = "go",
-	groovy = "groovy",
-	gtkrc = "gtkrc",
-	gvy = "groovy",
-	h = "c",
-	["h++"] = "cpp",
-	ha = "hare",
-	hh = "cpp",
-	hpp = "cpp",
-	hrl = "erlang",
-	hs = "haskell",
-	hta = "asp",
-	htm = "html",
-	html = "html",
-	hxx = "cpp",
-	i3 = "modula3",
-	i = 'c',
-	icn = "icon",
-	idl = "idl",
-	iface = "makefile",
-	ig = "modula3",
-	ily = "lilypond",
-	inc = "php",
-	inf = "ini",
-	ini = "ini",
-	inp = "apdl",
-	ins = "latex",
-	io = "io_lang",
-	java = "java",
-	jl = "julia",
-	journal = "ledger",
-	jq = "jq",
-	js = "javascript",
-	jsfl = "javascript",
-	json = "json",
-	jsp = "jsp",
-	jsx = "javascript",
-	ksh = "bash",
-	ledger = "ledger",
-	less = "less",
-	lgt = "logtalk",
-	lily = "lilypond",
-	link = "networkd",
-	lisp = "lisp",
-	litcoffee = "litcoffee",
-	lsp = "lisp",
-	ltx = "latex",
-	lua = "lua",
-	ly = "lilypond",
-	m = "objective_c",
-	m3 = "modula3",
-	mac = "apdl",
-	mak = "makefile",
-	makefile = "makefile",
-	markdown = "markdown",
-	md = "markdown",
-	me = "man",
-	meson = "meson",
-	["meson.build"] = "meson",
-	mg = "modula3",
-	mjs = "javascript",
-	mk = "makefile",
-	mksh = "bash",
-	ml = "caml",
-	mli = "caml",
-	mll = "caml",
-	mly = "caml",
-	mm = "objective_c",
-	mod = "modula2",
-	mom = "man",
-	moon = "moonscript",
-	mount = "systemd",
-	ms = "man",
-	myr = "myrddin",
-	n = "nemerle",
-	netdev = "networkd",
-	network = "networkd",
-	ni = "inform",
-	nim = "nim",
-	nix = "nix",
-	nsh = "nsis",
-	nsi = "nsis",
-	nsis = "nsis",
-	objc = "objective_c",
-	obs = "objeck",
-	odl = "idl",
-	org = "org",
-	orx = "rexx",
-	p = "pascal",
-	p8 = "pico8",
-	pag = "vb",
-	pas = "pascal",
-	patch = "diff",
-	path = "systemd",
-	perl = "perl",
-	php = "php",
-	php3 = "php",
-	php4 = "php",
-	phtml = "php",
-	pike = "pike",
-	pl = "perl",
-	plist = "xml",
-	plt = "gnuplot",
-	pm = "perl",
-	pmod = "pike",
-	po = "gettext",
-	pod = "perl",
-	pony = "pony",
-	pot = "gettext",
-	pro = "prolog",
-	prolog = "prolog",
-	properties = "props",
-	props = "props",
-	proto = "protobuf",
-	ps = "ps",
-	ps1 = "powershell",
-	psm1 = "powershell",
-	pure = "pure",
-	py = "python",
-	pyi = "python",
-	pyw = "python",
-	pyx = "python",
-	r = "rebol",
-	rake = "ruby",
-	rb = "ruby",
-	rbw = "ruby",
-	rc = "rc",
-	re = "reason",
-	reb = "rebol",
-	reg = "ini",
-	rej = "diff",
-	rex = "rexx",
-	rhtml = "rhtml",
-	rkt = "scheme",
-	rs = "rust",
-	rsc = "routeros",
-	rst = "rest",
-	s = "asm",
-	sass = "sass",
-	sc = "python",
-	scala = "scala",
-	sch = "scheme",
-	scm = "scheme",
-	scope = "systemd",
-	scss = "sass",
-	service = "systemd",
-	sh = "bash",
-	shtm = "html",
-	shtml = "html",
-	sig = "sml",
-	sld = "scheme",
-	slice = "systemd",
-	sls = "scheme",
-	sml = "sml",
-	sno = "snobol4",
-	socket = "systemd",
-	sources = "smalltalk",
-	spec = "rpmspec",
-	spin = "spin",
-	sql = "sql",
-	ss = "scheme",
-	st = "smalltalk",
-	sty = "latex",
-	sv = "verilog",
-	svg = "xml",
-	swap = "systemd",
-	t2t = "txt2tags",
-	target = "systemd",
-	taskpaper = "taskpaper",
-	tcl = "tcl",
-	tex = "latex",
-	texi = "texinfo",
-	timer = "systemd",
-	tk = "tcl",
-	tmac = "man",
-	toml = "toml",
-	ts = "typescript",
-	tsx = "typescript",
-	txt = "text",
-	typ = "typst",
-	typst = "typst",
-	usfm = "usfm",
-	v = "verilog",
-	vala = "vala",
-	vb = "vb",
-	vba = "vb",
-	vbs = "vb",
-	vcard = "vcard",
-	vcf = "vcard",
-	ver = "verilog",
-	vh = "vhdl",
-	vhd = "vhdl",
-	vhdl = "vhdl",
-	vue = "html",
-	wiki = "mediawiki",
-	wsf = "wsf",
-	xhtm = "html",
-	xhtml = "html",
-	xml = "xml",
-	xs = "xs",
-	xsd = "xml",
-	xsin = "xs",
-	xsl = "xml",
-	xslt = "xml",
-	xsrc = "xs",
-	xtend = "xtend",
-	xul = "xml",
-	yaml = "yaml",
-	yml = "yaml",
-	zig = "zig",
-	zsh = "bash"
-}
+local extensions = L.detect_extensions
+do
+	local e = extensions
+	-- local _ENV = e
+--	e.fs = 'forth'
+--	e.fs = 'fsharp'
+	e["1p"] = "man"
+	e["2p"] = "man"
+	e["3p"] = "man"
+	e["4p"] = "man"
+	e["5p"] = "man"
+	e["6p"] = "man"
+	e["7p"] = "man"
+	e["8p"] = "man"
+	e["9p"] = "man"
+	e.adoc = "asciidoc"
+	e.cjs = "javascript"
+	e.conf = "ini"
+	e.container = "systemd"
+	e.def = "modula2"
+	e.ebuild = "bash"
+	e.eml = "mail"
+	e.es = "rc"
+	e.fth = "forth"
+	e.glif = "xml"
+	e.glsl = "glsl"
+	e.h = "c"
+	e.i3 = "modula3"
+	e.ig = "modula3"
+	e.ily = "lilypond"
+	e.jsx = "javascript"
+	e.m3 = "modula3"
+	e.me = "man"
+	e.meson = "meson"
+	e.mg = "modula3"
+	e.mjs = "javascript"
+	e.mk = "makefile"
+	e.mod = "modula2"
+	e.mom = "man"
+	e.ms = "man"
+	e.plist = "xml"
+	e.pro = "prolog"
+	e.psm1 = "powershell"
+	e.pyi = "python"
+	e.pyx = "python"
+	e.rc = "rc"
+	e.rej = "diff"
+	e.rkt = "scheme"
+	e.sld = "scheme"
+	e.sls = "scheme"
+	e.ss = "scheme"
+	e.sv = "verilog"
+	e.tmac = "man"
+	e.tsx = "typescript"
+	e.txt = "text"
+	e.typ = "typst"
+	e.typst = "typst"
+	e.usfm = "usfm"
+	e.wiki = "mediawiki"
+	e.xhtm = "html"
+	M.extensions = e
+end
 
-M.extensions = extensions
+do
+	local p = L.detect_patterns
+	p["^#.* by RouterOS"] = 'routeros'
+	p["^execve%("] = 'strace'
+end
 
 -- Lookup table for mime [mime] = "lexer"
 -- "text/" is prepended so you can omit it
@@ -747,6 +418,8 @@ end
 -- Which is slow, and semi non-portable
 local function Detect(win)
 	local file = win.file
+	local path = file.name -- filepath
+	local mime
 
 	-- pass first few bytes of file to custom file type detector functions
 	local data = file:content(0, 256)
@@ -778,8 +451,6 @@ local function Detect(win)
 		end
 	end
 
-	local mime
-	local path = file.name -- filepath
 	if path and path~="" then
 		local name = path and path:match("[^/]+$") -- filename
 		if name then
@@ -794,6 +465,9 @@ local function Detect(win)
 
 		if name and #name > 0 then
 			if filenames[name] then return filenames[name] end
+
+			local l = L.detect(name, data and #data>0 and data or "")
+			if l then return l end
 
 			-- detect filetype by filename ending with a configured extension
 			local ext = name:match"%.([^%.]+)$"
@@ -834,8 +508,9 @@ end
 
 vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 	local syntax = Detect(win)
+	-- syntax is ftdetect.filetypes which has settings
+	-- but its the lexer, which may not exist
 	if syntax then
-		-- Cannot move because of win
 		local filetype = M.filetypes[syntax]
 		for _, cmd in pairs(filetype.cmd or {}) do
 			vis:command(cmd)
