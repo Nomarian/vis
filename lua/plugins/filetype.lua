@@ -421,6 +421,7 @@ local extensions = {
 	html = "html",
 	hxx = "cpp",
 	i3 = "modula3",
+	i = 'c',
 	icn = "icon",
 	idl = "idl",
 	iface = "makefile",
