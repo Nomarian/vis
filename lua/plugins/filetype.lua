@@ -303,7 +303,6 @@ local extensions = {
 	awk = "awk",
 	bas = "vb",
 	bash = "bash",
-	bash_profile = "bash",
 	bashrc = "bash",
 	bat = "batch",
 	bbl = "latex",
