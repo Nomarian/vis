@@ -666,7 +666,7 @@ local function Detect(win)
 		if name and #name > 0 then
 			if filenames[name] then return filenames[name] end
 
-			local l = L.detect(name, data or "")
+			local l = L.detect(name, data and data:match"^[^\n]+" or "")
 			if l then return l end
 
 			-- detect filetype by filename ending with a configured extension
