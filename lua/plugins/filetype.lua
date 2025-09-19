@@ -142,23 +142,14 @@ vis.ftdetect.filetypes = {
 		utility = { "^python%d?" }
 	},
 	r = {},
-	rails = {
-		datap = {
-			'^%s*class%s+%S+%s*<%s*ApplicationController',
-			'^%s*class%s+%S+%s*<%s*ActionController::Base',
-			'^%s*class%s+%S+%s*<%s*ActiveRecord::Base',
-			'^%s*class%s+%S+%s*<%s*ActiveRecord::Migration',
-		}
-	},
+	rails = {},
 	rc = {},
 	reason = {},
 	rebol = {},
 	rest = {},
 	rexx = {},
 	rhtml = {},
-	routeros = {
-		datap = { "^#.* by RouterOS" }
-	},
+	routeros = {},
 	rpmspec = {},
 	ruby = {},
 	rust = {},
@@ -170,9 +161,7 @@ vis.ftdetect.filetypes = {
 	snobol4 = {},
 	spin = {},
 	sql = {},
-	strace = {
-		datap = { "^execve%(" }
-	},
+	strace = {},
 	systemd = {},
 	taskpaper = {},
 	tcl = {},
@@ -188,20 +177,24 @@ vis.ftdetect.filetypes = {
 	verilog = {},
 	vhdl = {},
 	wsf = {},
-	xml = {
-		datap = {
-			'^%s*<%?xml%s'
-		}
-	},
+	xml = {},
 	xs = {},
 	xtend = {},
-	yaml = {
-		datap = {
-			'^#cloud%-config'
-		}
-	},
+	yaml = {},
 	zig = {}
 }
+
+local data_patterns = {
+	['^#cloud%-config'] = 'yaml',
+	['^%s*<%?xml%s'] = 'xml',
+	["^execve%("] = 'strace',
+	["^#.* by RouterOS"] = 'routeros',
+	['^%s*class%s+%S+%s*<%s*ApplicationController'] = 'rails',
+	['^%s*class%s+%S+%s*<%s*ActionController::Base'] = 'rails',
+	['^%s*class%s+%S+%s*<%s*ActiveRecord::Base'] = 'rails',
+	['^%s*class%s+%S+%s*<%s*ActiveRecord::Migration'] = 'rails',
+}
+M.data_patterns = data_patterns
 
 -- complete filename, case sensitive
 local filenames = {
@@ -767,6 +760,9 @@ local function Detect(win)
 				end
 			end
 		else
+			for patt, syntax in pairs(data_patterns) do
+				if data:find(patt) then return syntax end
+			end
 			for lang, ft in pairs(M.filetypes) do
 				if
 					TStringFind(ft.datap, data)
