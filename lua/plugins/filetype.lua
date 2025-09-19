@@ -185,14 +185,8 @@ vis.ftdetect.filetypes = {
 }
 
 local data_patterns = {
-	['^#cloud%-config'] = 'yaml',
-	['^%s*<%?xml%s'] = 'xml',
 	["^execve%("] = 'strace',
 	["^#.* by RouterOS"] = 'routeros',
-	['^%s*class%s+%S+%s*<%s*ApplicationController'] = 'rails',
-	['^%s*class%s+%S+%s*<%s*ActionController::Base'] = 'rails',
-	['^%s*class%s+%S+%s*<%s*ActiveRecord::Base'] = 'rails',
-	['^%s*class%s+%S+%s*<%s*ActiveRecord::Migration'] = 'rails',
 }
 M.data_patterns = data_patterns
 
@@ -610,8 +604,11 @@ local extensions = {
 	zig = "zig",
 	zsh = "bash"
 }
-
 M.extensions = extensions
+
+local L = require"lexers.lexer"
+L.detect_extensions = extensions
+L.detect_patterns = data_patterns
 
 -- Lookup table for mime [mime] = "lexer"
 -- "text/" is prepended so you can omit it
@@ -790,6 +787,9 @@ local function Detect(win)
 
 		if name and #name > 0 then
 			if filenames[name] then return filenames[name] end
+
+			local l = L.detect(name, data or "")
+			if l then return l end
 
 			-- detect filetype by filename ending with a configured extension
 			local ext = name:match"%.([^%.]+)$"
