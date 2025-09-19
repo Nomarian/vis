@@ -16,173 +16,51 @@ vis.ftdetect.ignoresuffixes = {
 	datap = {} patterns for the first 256 characters of the file}
 }
 --]]
-vis.ftdetect.filetypes = {
-	actionscript = {},
-	ada = {},
-	antlr = {},
-	apdl = {},
-	apl = {},
-	applescript = {},
-	asciidoc = {},
-	asm = {},
-	asp = {},
-	autoit = {},
-	awk = {},
-	bash = {},
-	batch = {},
-	bibtex = {},
-	boo = {},
-	c = {},
-	caml = {},
-	chuck = {},
-	clojure = {},
+local filetypes = {
 	cmake = {
 		name = { "%.cmake.in$", "%.ctest.in$" }
 	},
-	coffeescript = {},
-	cpp = {},
 	crontab = {
 		cmd = { "set savemethod inplace" },
 		name = { "^crontab.*$" }
 	},
-	crystal = {},
-	csharp = {},
-	css = {},
-	cuda = {},
-	d = {},
-	dart = {},
-	desktop = {},
-	diff = {},
-	dockerfile = {},
-	dot = {},
-	dsv = {},
-	eiffel = {},
-	elixir = {},
-	elm = {},
-	erlang = {},
-	factor = {},
-	fantom = {},
-	faust = {},
-	fennel = {},
-	fish = {},
-	forth = {},
-	fortran = {},
-	fsharp = {},
-	fstab = {},
-	gap = {},
-	gemini = {},
-	gettext = {},
-	gherkin = {},
 	["git-commit"] = {
 		alt_name = "diff",
 		cmd = { "set colorcolumn 72" },
 	},
-	["git-rebase"] = {},
-	gleam = {},
-	glsl = {},
-	gnuplot = {},
-	go = {},
-	groovy = {},
-	gtkrc = {},
-	hare = {},
-	haskell = {},
-	html = {},
-	icon = {},
-	idl = {},
-	inform = {},
-	ini = {},
-	io_lang = {},
-	java = {},
-	javascript = {},
-	jq = {},
-	json = {},
-	jsp = {},
-	julia = {},
-	latex = {},
-	ledger = {},
-	less = {},
-	lilypond = {},
-	lisp = {},
-	litcoffee = {},
-	logtalk = {},
 	lua = {
 		utility = { "^lua%-?5?%d?$", "^lua%-?5%.%d$" }
 	},
-	mail = {},
-	makefile = {},
-	man = {},
-	markdown = {},
-	mediawiki = {},
-	meson = {},
-	modula2 = {},
-	modula3 = {},
-	moonscript = {},
-	myrddin = {},
-	nemerle = {},
-	networkd = {},
-	nim = {},
-	nix = {},
-	nsis = {},
-	objective_c = {},
-	org = {},
-	pascal = {},
-	perl = {},
-	php = {},
-	pico8 = {},
-	pike = {},
-	pkgbuild = {},
-	pony = {},
-	powershell = {},
-	prolog = {},
-	props = {},
-	protobuf = {},
-	ps = {},
-	pure = {},
 	python = {
 		utility = { "^python%d?" }
 	},
-	r = {},
-	rails = {},
-	rc = {},
-	reason = {},
-	rebol = {},
-	rest = {},
-	rexx = {},
-	rhtml = {},
-	routeros = {},
-	rpmspec = {},
-	ruby = {},
-	rust = {},
-	sass = {},
-	scala = {},
-	scheme = {},
-	smalltalk = {},
-	sml = {},
-	snobol4 = {},
-	spin = {},
-	sql = {},
-	strace = {},
-	systemd = {},
-	taskpaper = {},
-	tcl = {},
-	texinfo = {},
-	text = {},
-	toml = {},
-	typescript = {},
-	typst = {},
-	usfm = {},
-	vala = {},
-	vb = {},
-	vcard = {},
-	verilog = {},
-	vhdl = {},
-	wsf = {},
-	xml = {},
-	xs = {},
-	xtend = {},
-	yaml = {},
-	zig = {}
 }
+-- backwards compatibility
+	for syntax,T in pairs(filetypes) do
+		T.ext = {}
+		T.name = {}
+		T.mime  = {}
+		T.utility = {}
+		T.hashbang = {}
+		T.cmd = {}
+	end
+	vis.ftdetect.filetypes = filetypes
+	-- In order to be semi backwards compatible, we create a table on each index access
+	-- This should be removed... eventually.
+	setmetatable(filetypes, {
+		__index = function (t,k)
+			local T = {
+				ext = {},
+				name = {},
+				utility = {},
+				mime = {},
+				hashbang = {},
+				cmd = {}
+			}
+			rawset(t,k,T)
+			return T
+		end
+	})
 
 local data_patterns = {
 	["^execve%("] = 'strace',
@@ -803,6 +681,9 @@ local function Detect(win)
 				for _, pattern in ipairs(ft.name or {}) do
 					if name:find(pattern) then return lang end
 				end
+				for _, pattern in ipairs(ft.ext or {}) do
+					if name:find(pattern) then return lang end
+				end
 			end
 		end
 
@@ -831,22 +712,31 @@ end
 vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 	local syntax = Detect(win)
 	if syntax then
-		-- Cannot move because of win
-		local filetype = M.filetypes[syntax]
-		for _, cmd in pairs(filetype.cmd or {}) do
-			vis:command(cmd)
+		-- in order to avoid the backwards compatibility metatable, rawget is used
+		local filetype = rawget(filetypes, syntax)
+		if filetype then
+			for _, cmd in ipairs(filetype.cmd or {}) do
+				vis:command(cmd)
+			end
+			syntax = filetype.alt_name or syntax
 		end
-		syntax = filetype.alt_name or syntax
 		if package.searchpath("lexers." .. syntax, package.path) then
 			win:set_syntax(syntax)
 			return
 		else
 			vis:info(
 				string.format(
-					"Syntax '%s' not found", syntax
+					"Lexer '%s' not found", syntax
 				)
 			)
 		end
+	else
+		-- this should be an error... maybe?
+		vis:info(
+			string.format(
+				"Syntax '%s' not found", syntax
+			)
+		)
 	end
 	win:set_syntax(nil)
 	return nil
