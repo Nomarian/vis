@@ -738,15 +738,7 @@ vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 				)
 			)
 		end
-	else
-		-- this should be an error... maybe?
-		vis:info(
-			string.format(
-				"Syntax '%s' not found", syntax
-			)
-		)
 	end
 	win:set_syntax(nil)
 	return nil
 end)
-
