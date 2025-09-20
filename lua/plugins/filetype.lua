@@ -582,34 +582,24 @@ end
 		if PATH matches /env, utility should be in args
 			POSIX does not have -S, but BSDs/Linux seem to
 			All do seem to have name=value
-			So far, this does the rudimentary job of parsing env args
-			for most cases, but its a bandaid
 			discard first arg if /-[^S]*S/; and all subsequent /=/
 			NOTE: this means you can't have a command with /^-|=/
-	return first field, which should be the utility.
-	NOTE: long-options (GNUisms) unsupported
+	NOTES: long-options (GNUisms) unsupported
 --]]
 local function GetHashBang(data)
-	local fullhb, utility = data:match"^#![ \t]*(/+[^/\n]+[^\n]*)"
-	if fullhb then
-		local i, field = 1, {}
-		for m in fullhb:gmatch"%g+" do field[i],i = m,i+1 end
-		-- NOTE: executables should not have a space (or =, see below)
-		if field[1]:match"/env$" then
-			table.remove(field,1)
-			-- it is assumed that the first argument are short options, with -S inside
-			if string.find(field[1] or "", "^%-[^S-]*S") then -- -S found
-				table.remove(field,1)
-				-- skip all name=value
-				while string.find(field[1] or "","=") do
-					table.remove(field,1)
-				end
-				-- (hopefully) whatever is left in field[1] should be the utility or nil
-			end
+	local hb, pathname, args = data:match"^#![ \t]*((/%S+)%s*([^\n]*))\n"
+	local interpreter = pathname and pathname:match"[^/]+$"
+	if interpreter=="env" then
+		if args:find"^%-[^S-]*S.-%s+%S" then
+			args = args:match"%s+(.+)" -- skip -S
+			args = args
+				:gsub("%-[Cu] %S+", "")
+				:gsub("[^%s=]+=[^%s=]+","")
+				-- You might get a false positive with long options using =
 		end
-		utility = string.match(field[1] or "", "[^/]+$") -- remove filepath
+		interpreter = args
 	end
-	return fullhb, utility
+	return hb, interpreter
 end
 
 -- Returns syntax filetype
@@ -626,7 +616,9 @@ local function Detect(win)
 
 	-- pass first few bytes of file to custom file type detector functions
 	local data = file:content(0, 256)
+	local line
 	if data and #data > 0 then
+		line = file.lines[1]
 		local fullhb, utility = GetHashBang(data)
 		if fullhb then
 			if utility and utilities[utility] then
@@ -674,7 +666,7 @@ local function Detect(win)
 		if name and #name > 0 then
 			if filenames[name] then return filenames[name] end
 
-			local l = L.detect(name, data and data:match"^[^\n]+" or "")
+			local l = L.detect(name, line or "")
 			if l then return l end
 
 			-- detect filetype by filename ending with a configured extension
@@ -742,3 +734,4 @@ vis.events.subscribe(vis.events.WIN_OPEN, function(win)
 	win:set_syntax(nil)
 	return nil
 end)
+
