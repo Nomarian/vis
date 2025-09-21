@@ -8,20 +8,17 @@ vis.ftdetect.ignoresuffixes = {
 }
 
 --[[
-The filetypes table is the master table, its supposed to be lexer = { [items] = {} }
-but lexer doesn't necessarily need to be a lexer,
-it could hold options or settings that are applied on :set syntax [syntax]
-almost all items are arrays of lua pattern strings
+syntax doesn't necessarily need to be pointing to lexers/$lexer,
 Running hundreds of string.find on each file open is slow, so if you must add to an item
-use the lookup tables like extensions and try to point to the filetypes table
+prefer the hash tables
 
 [syntax|lexer] = {
 	alt_name = "" -- lexer name
 	name = { lua pattern string list }
-	cmd = { vis:command() list of strings }
-	utility = {} list of patterns for the hashbang utility (no paths)
-	hashbang = {} list of patterns for the complete hashbang
-	datap = {} patterns for the first 256 characters of the file}
+	cmd = {} list, all will run in vis:command()
+	utility = {} patterns for the hashbang utility (no path)
+	hashbang = {} patterns for the hashbang starting with the path (gsub("#!%s+"))
+	datap = {} patterns for the first 256 characters of the file
 }
 --]]
 local filetypes = {
