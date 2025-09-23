@@ -39,6 +39,9 @@ local filetypes = {
 	python = {
 		utility = { "^python%d?" }
 	},
+	r = {
+		name = { "%.Rout%.fail$", "%.Rout%.save$" }
+	}
 }
 -- backwards compatibility
 	for syntax,T in pairs(filetypes) do
@@ -110,9 +113,11 @@ local filenames = {
 	PKGBUILD = 'pkgbuild',
 	['.yash_profile'] = 'bash',
 	['.yashrc'] = 'bash',
+	["CMakeLists.txt"] = "cmake",
 }
 M.filenames = filenames
 
+-- a "." in a key is redundant this is for single extensions
 local extensions = {
 	["1"] = "troff",
 	["1p"] = "man",
@@ -143,7 +148,6 @@ local extensions = {
 	["9x"] = "troff",
 	ASM = "asm",
 	C = "c",
-	["CMakeLists.txt"] = "cmake",
 	Dockerfile = "dockerfile",
 	GNUmakefile = "makefile",
 	Makefile = "makefile",
@@ -152,8 +156,6 @@ local extensions = {
 	Rakefile = "ruby",
 	Rhistory = "r",
 	Rout = "r",
-	["Rout.fail"] = "r",
-	["Rout.save"] = "r",
 	Rt = "r",
 	S = "asm",
 	SNO = "snobol4",
@@ -197,7 +199,6 @@ local extensions = {
 	cljs = "clojure",
 	cls = "vb",
 	cmake = "cmake",
-	["cmake.in"] = "cmake",
 	cmd = "batch",
 	cnf = "ini",
 	coffee = "coffeescript",
@@ -210,7 +211,6 @@ local extensions = {
 	csh = "bash",
 	css = "css",
 	ctest = "cmake",
-	["ctest.in"] = "cmake",
 	ctl = "vb",
 	cu = "cuda",
 	cuh = "cuda",
@@ -337,7 +337,6 @@ local extensions = {
 	md = "markdown",
 	me = "man",
 	meson = "meson",
-	["meson.build"] = "meson",
 	mg = "modula3",
 	mjs = "javascript",
 	mk = "makefile",
@@ -592,14 +591,13 @@ local function GetHashBang(data)
 	local hb, pathname, args = data:match"^#![ \t]*((/%S+)%s*([^\n]*))\n"
 	local interpreter = pathname and pathname:match"[^/]+$"
 	if interpreter=="env" then
-		if args:find"^%-[^S-]*S.-%s+%S" then
-			args = args:match"%s+(.+)" -- skip -S
-			args = args
+		local a = args:match"^%-[^S-]*S%s*(.+)" -- #!env -Ssh or -S sh
+		if a then
+			args = a
 				:gsub("%-[Cu] %S+", "")
 				:gsub("[^%s=]+=[^%s=]+","")
-				-- You might get a false positive with long options using =
 		end
-		interpreter = args
+		interpreter = args:match"%S+"
 	end
 	return hb, interpreter
 end
