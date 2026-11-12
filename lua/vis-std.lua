@@ -58,15 +58,6 @@ vis:option_register("theme", "string", function(name)
 	return true
 end, "Color theme to use, filename without extension")
 
-vis:option_register("syntax", "string", function(name)
-	if not vis.win then return false end
-	if not vis.win:set_syntax(name) then
-		vis:warn(string.format("Unknown syntax definition: `%s'", name))
-		return false
-	end
-	return true
-end, "Syntax highlighting lexer to use")
-
 vis:option_register("horizon", "number", function(horizon)
 	if not vis.win then return false end
 	vis.win.horizon = horizon

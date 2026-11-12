@@ -421,8 +421,8 @@ end
 
 
 -- perform actions saved in filetype[]
-local ftAction = function(win) --> string lexer_name
-	local lexer_name = win.file.syntax
+local ftAction = function(win, syntax) --> string lexer_name
+	local lexer_name = syntax or win.file.syntax
 	local filetype = rawget(filetypes, lexer_name) -- avoid backwards compatibility mt
 	if filetype then
 		for _, Action in ipairs(filetype.actions or {}) do
@@ -439,6 +439,29 @@ local ftAction = function(win) --> string lexer_name
 	return lexer_name
 end
 M.ft_action = ftAction
+
+
+vis:option_register("syntax", "string", function(name)
+	local win = vis.win
+	if not win then return false end
+	local syntax = ftAction(win, name)
+	if syntax~=name then
+		win.file.syntax = name
+	end
+	if not win:set_syntax(syntax) then
+		vis:warn(string.format("Unknown syntax definition: `%s'", name))
+		return false
+	end
+	return true
+end, "Syntax highlighting lexer to use")
+
+
+vis:option_register("lexer", "string", function(lexer)
+	local win = vis.win
+	if not win then return false end
+	if win:set_syntax(lexer) then return true end
+	vis:info(string.format("Unknown lexer definition: `%s'", lexer))
+end, "Changes window lexer")
 
 
 -- FILE_OPEN runs before WIN_OPEN
