@@ -10,12 +10,17 @@ vis.events.subscribe(vis.events.INIT, function()
 		vis:command("set change256colors false")
 	end
 
-	vis:command("set theme default")
+	if vis.lexers.load then
+		vis.lexers.load("text") -- initialize lexer.lua, sets up lexers.property
+		vis:command("set theme default")
+	end
 	vis.warn = vis.info
 end)
 
 
 vis:option_register("theme", "string", function(name)
+	if not package.loaded.lexer then return false end
+
 	local theme_path = 'themes/' .. name
 	package.loaded[theme_path] = nil
 	if not pcall(require, theme_path) then
@@ -24,12 +29,9 @@ vis:option_register("theme", "string", function(name)
 	end
 
 	local lexers = vis.lexers
-	lexers.lexers = {} -- clears lexers cache
-
-	if not lexers.load then return false end
-	if not lexers.property then lexers.load("text") end
 	local colors = lexers.colors
-	local default_colors = { "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white" }
+	local default_colors = {
+		"black", "red", "green", "yellow", "blue", "magenta", "cyan", "white" }
 	for _, c in ipairs(default_colors) do
 		if not colors[c] or colors[c] == '' then
 			colors[c] = c
