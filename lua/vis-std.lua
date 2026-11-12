@@ -1,11 +1,17 @@
 -- standard vis event handlers
 
+-- vis:info doesn't stack, so you won't see all the errors pre INIT, just latest
+-- vis:message should be used in the compilation stage
+-- for commands and options, vis:warn should be used
+vis.warn = vis.message
+
 vis.events.subscribe(vis.events.INIT, function()
 	if os.getenv("TERM_PROGRAM") == "Apple_Terminal" then
 		vis:command("set change256colors false")
 	end
 
 	vis:command("set theme default")
+	vis.warn = vis.info
 end)
 
 
@@ -13,7 +19,7 @@ vis:option_register("theme", "string", function(name)
 	local theme_path = 'themes/' .. name
 	package.loaded[theme_path] = nil
 	if not pcall(require, theme_path) then
-		vis:message( ('Theme "%s" not found'):format(name) )
+		vis:warn( ('Theme "%s" not found'):format(name) )
 		return false
 	end
 
@@ -55,7 +61,7 @@ end, "Color theme to use, filename without extension")
 vis:option_register("syntax", "string", function(name)
 	if not vis.win then return false end
 	if not vis.win:set_syntax(name) then
-		vis:info(string.format("Unknown syntax definition: `%s'", name))
+		vis:warn(string.format("Unknown syntax definition: `%s'", name))
 		return false
 	end
 	return true
