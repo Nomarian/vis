@@ -466,9 +466,17 @@ end
 vis:option_register("syntax", "string", function(name)
 	local win = vis.win
 	if not win then return false end
-	local syntax = Action(win, name)
-	if syntax~=name then
-		win.file.syntax = name
+	local syntax
+	if name =='off' then
+		win.lastsyntax, win.syntax = win.syntax, nil
+		return true
+	elseif name=='on' then
+		syntax = win.lastsyntax or win.file.syntax
+	else -- only runs on syntax change
+		syntax = Action(win, name)
+		if syntax~=name then
+			win.file.syntax = name
+		end
 	end
 	if not win:set_syntax(syntax) then
 		vis:warn(string.format("Unknown syntax definition: `%s'", name))
@@ -481,6 +489,12 @@ end, "Syntax highlighting lexer to use")
 vis:option_register("lexer", "string", function(lexer)
 	local win = vis.win
 	if not win then return false end
+	if lexer=='off' then
+		win.lastsyntax, win.syntax = win.syntax, nil
+		return true
+	elseif lexer=='on' then
+		lexer = win.lastsyntax or win.file.syntax
+	end
 	if win:set_syntax(lexer) then return true end
 	vis:info(string.format("Unknown lexer definition: `%s'", lexer))
 end, "Changes window lexer")
@@ -491,7 +505,7 @@ end, "Changes window lexer")
 -- FILE_OPEN runs before WIN_OPEN
 vis.events.subscribe(vis.events.FILE_OPEN, function(file)
 	file.basename = (file.name or file.path or ''):match("[^/]+$")
-	file.syntax = Detect(file)
+	file.syntax = Detect(file) -- ALWAYS points to a detected syntax, not lexer_name
 end)
 
 
