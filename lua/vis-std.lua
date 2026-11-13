@@ -17,10 +17,9 @@ vis.events.subscribe(vis.events.INIT, function()
 	vis.warn = vis.info
 end)
 
-
+local active_theme
 vis:option_register("theme", "string", function(name)
 	if not package.loaded.lexer then return false end
-
 	local theme_path = 'themes/' .. name
 	package.loaded[theme_path] = nil
 	if not pcall(require, theme_path) then
@@ -28,7 +27,11 @@ vis:option_register("theme", "string", function(name)
 		return false
 	end
 
+	-- set the active theme
+	active_theme = name
+
 	local lexers = vis.lexers
+	lexers.lexers = {} -- clears lexers cache
 	local colors = lexers.colors
 	local default_colors = {
 		"black", "red", "green", "yellow", "blue", "magenta", "cyan", "white" }
@@ -58,6 +61,8 @@ vis:option_register("theme", "string", function(name)
 		win:set_syntax(win.syntax)
 	end
 	return true
+end, function()
+	return active_theme
 end, "Color theme to use, filename without extension")
 
 vis:option_register("horizon", "number", function(horizon)
