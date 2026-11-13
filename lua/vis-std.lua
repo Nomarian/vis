@@ -1,8 +1,9 @@
 -- standard vis event handlers
 
--- vis:info doesn't stack, so you won't see all the errors pre INIT, just latest
--- vis:message should be used in the compilation stage
--- for commands and options, vis:warn should be used
+-- vis:info doesn't stack, so you won't see all the errors post INIT, just latest one
+-- vis:message should be used instead, some commands are used both post and pre INIT
+-- vis:warn should be used, which will use vis:message PRE INIT and switch to vis:info
+-- post INIT, for commands and options, vis:warn should be used
 vis.warn = vis.message
 
 vis.events.subscribe(vis.events.INIT, function()
@@ -20,6 +21,7 @@ end)
 local active_theme
 vis:option_register("theme", "string", function(name)
 	if not package.loaded.lexer then return false end
+
 	local theme_path = 'themes/' .. name
 	package.loaded[theme_path] = nil
 	if not pcall(require, theme_path) then
@@ -31,7 +33,6 @@ vis:option_register("theme", "string", function(name)
 	active_theme = name
 
 	local lexers = vis.lexers
-	lexers.lexers = {} -- clears lexers cache
 	local colors = lexers.colors
 	local default_colors = {
 		"black", "red", "green", "yellow", "blue", "magenta", "cyan", "white" }
